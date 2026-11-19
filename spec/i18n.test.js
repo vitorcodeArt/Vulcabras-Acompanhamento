@@ -17,7 +17,7 @@ describe('i18n', () => {
       return { default: mockEN }
     })
 
-    vi.mock('../src/translations/fr.json', () => {
+    vi.mock('../src/translations/pt.json', () => {
       throw new Error('no such file')
     })
 
@@ -25,8 +25,8 @@ describe('i18n', () => {
   })
 
   describe('#loadTranslations', () => {
-    it('return undefined for fr and fallback to en', async () => {
-      await i18n.loadTranslations('fr')
+    it('return undefined for pt and fallback to en', async () => {
+      await i18n.loadTranslations('pt')
       const result = i18n.t('one')
       expect(result).toBe('the first translation')
     })
@@ -40,7 +40,7 @@ describe('i18n', () => {
     })
 
     it("returns null if the file doesn't exist", async () => {
-      const result = await i18n.tryRequire('fr')
+      const result = await i18n.tryRequire('pt')
       expect(result).toBe(null)
     })
   })

@@ -1,0 +1,240 @@
+{
+  "app": {
+    "name": "Acompanhamento Webview",
+    "short_description": "Acompanhe os envios e as jornadas das webviews (catálogo, troca/devolução e rastreamento).",
+    "long_description": "Painel de acompanhamento das webviews enviadas nas conversas: envios, cliques, conclusões, pedidos de atendente, erros e relatórios de troca/devolução e catálogo.",
+    "installation_instructions": "Informe o endereço do servidor (api_host) e o segredo de acesso (api_secret) e clique em Instalar.",
+    "parameters": {
+      "api_host": {
+        "label": "Endereço do servidor (api_host)",
+        "helpText": "Endereço https do servidor de acompanhamento, sem barra no final."
+      },
+      "api_secret": {
+        "label": "Segredo de acesso (api_secret)",
+        "helpText": "Segredo da API de acompanhamento. Fica guardado de forma segura e não aparece no navegador."
+      },
+      "demo_mode": {
+        "label": "Modo demonstração",
+        "helpText": "Mostra dados fictícios, sem consultar o servidor."
+      }
+    }
+  },
+  "errors": {
+    "waking": "Acordando o servidor, isso pode levar até 1 minuto",
+    "unauthorized": "Acesso negado. Confira o segredo (api_secret) nas configurações do app.",
+    "rate_limited": "Muitas consultas em pouco tempo. Aguarde um minuto e tente de novo.",
+    "unavailable": "O servidor está indisponível no momento. Tente de novo em instantes.",
+    "config": "Configuração inválida. Confira o api_host (endereço https) nas configurações do app.",
+    "bad_request": "Não foi possível fazer essa consulta.",
+    "not_found": "Não encontrado.",
+    "unknown": "Algo deu errado. Tente de novo.",
+    "retry": "Tentar de novo"
+  },
+  "filters": {
+    "period": "Período",
+    "periods": {
+      "today": "Hoje",
+      "7d": "7 dias",
+      "30d": "30 dias"
+    },
+    "title": "Filtros",
+    "brand": "Marca",
+    "flow": "Fluxo",
+    "all_brands": "Todas as marcas",
+    "all_flows": "Todos os fluxos"
+  },
+  "kpi": {
+    "sends": "Enviados",
+    "click_rate": "Taxa de clique",
+    "completed": "Concluídos",
+    "handoff": "Pediram atendente"
+  },
+  "common": {
+    "loading": "Carregando",
+    "empty": "Nada para mostrar.",
+    "show_table": "Ver dados em tabela",
+    "copied": "Copiado",
+    "others": "Outros",
+    "no_data": "Sem dados no período."
+  },
+  "brands": {
+    "mizuno": "Mizuno",
+    "olympikus": "Olympikus",
+    "underarmour": "Under Armour"
+  },
+  "flows": {
+    "catalog": "Catálogo",
+    "reverse": "Troca/Devolução",
+    "tracking": "Rastreamento"
+  },
+  "overview": {
+    "empty": "Nenhum envio no período.",
+    "daily": "Envios por dia",
+    "daily_alt": "Gráfico de linhas com envios, cliques e conclusões por dia. Os mesmos dados estão na tabela abaixo.",
+    "date": "Dia",
+    "name": "Nome",
+    "by_flow": "Por fluxo",
+    "by_brand": "Por marca",
+    "series": {
+      "sends": "Enviados",
+      "clicked": "Clicaram",
+      "completed": "Concluídos"
+    },
+    "cards": {
+      "sends": "Enviados",
+      "send_failed": "Falha no envio",
+      "clicked": "Clicaram",
+      "not_clicked": "Não clicaram",
+      "click_rate": "Taxa de clique",
+      "completed": "Concluídos",
+      "completion_of_clicked": "Conclusão (sobre clicados)",
+      "completion_of_sent": "Conclusão (sobre enviados)",
+      "handoff": "Pediram atendente",
+      "errors": "Com erro"
+    },
+    "daily_hint": "Enviados, clicaram e concluídos em cada dia.",
+    "breakdown_hint": "Enviados no período e taxas."
+  },
+  "funnel": {
+    "title": "Funil",
+    "empty": "Nenhuma sessão no período.",
+    "sessions": "Sessões",
+    "drop_off": "Queda",
+    "avg_time": "Tempo médio",
+    "hint": "Quantas sessões chegaram em cada etapa.",
+    "step": "Etapa"
+  },
+  "dashboard": {
+    "title": "Acompanhamento Webview",
+    "subtitle": "Envios, cliques e conclusões nas conversas",
+    "demo_badge": "Demonstração",
+    "coming_soon": "Esta tela chega na próxima fase.",
+    "tabs": {
+      "overview": "Visão geral",
+      "sends": "Envios",
+      "reverse": "Troca/Devolução",
+      "catalog": "Catálogo"
+    }
+  },
+  "clickStatus": {
+    "not_clicked": "Sem clique",
+    "clicked": "Clicou",
+    "send_failed": "Falha no envio"
+  },
+  "status": {
+    "completed": "Concluído",
+    "handoff": "Pediu atendente",
+    "error": "Terminou com erro",
+    "abandoned": "Abandonou",
+    "in_progress": "Em andamento"
+  },
+  "steps": {
+    "start": "Início",
+    "identify": "Identificação",
+    "items": "Itens",
+    "reasons": "Motivo",
+    "address": "Endereço",
+    "retention": "Vale-compras",
+    "shipping": "Envio",
+    "refund": "Reembolso",
+    "summary": "Resumo",
+    "result": "Resultado",
+    "categories": "Categorias",
+    "products": "Produtos",
+    "details": "Detalhe do produto",
+    "submit": "Envio da solicitação"
+  },
+  "sends": {
+    "title": "Envios",
+    "search_label": "Buscar envio",
+    "search_placeholder": "ID da conversa, nº do pedido ou nome",
+    "search_button": "Buscar",
+    "clear": "Limpar",
+    "search_min": "Digite ao menos 3 caracteres.",
+    "click_status": "Status do clique",
+    "all_click_status": "Todos os status do clique",
+    "status": "Situação",
+    "all_status": "Todas as situações",
+    "empty": "Nenhum envio encontrado com esses filtros.",
+    "load_more": "Carregar mais",
+    "loading_more": "Carregando…",
+    "loaded": "{{n}} envios carregados",
+    "copy": "Copiar ID da conversa {{id}}",
+    "open_journey": "Ver jornada do envio de {{date}}",
+    "open_ticket": "Abrir ticket {{id}}",
+    "catalog_result": "Produtos vistos: {{views}} · Carrinho: {{cart}}",
+    "columns": {
+      "datetime": "Data/hora",
+      "conversation": "ID da conversa",
+      "customer": "Cliente",
+      "brand": "Marca",
+      "flow": "Fluxo",
+      "click": "Status do clique",
+      "status": "Situação",
+      "last_step": "Última etapa",
+      "result": "Resultado",
+      "ticket": "Ticket"
+    },
+    "table_region": "Tabela de envios (role para ver mais colunas)"
+  },
+  "journey": {
+    "back": "Voltar para envios",
+    "title": "Jornada do envio",
+    "timeline": "Linha do tempo",
+    "time_in_step": "Tempo na etapa",
+    "reason": "Motivo",
+    "error": "Erro",
+    "no_click": "Botão enviado em {{date}}, sem abertura registrada.",
+    "send_failed": "O botão não foi enviado: falha no envio em {{date}}."
+  },
+  "requestTypes": {
+    "troca": "Troca",
+    "devolucao": "Devolução"
+  },
+  "reverse": {
+    "empty": "Nenhuma solicitação no período.",
+    "completed": "Solicitações concluídas",
+    "sessions": "Sessões",
+    "avg_time": "Tempo médio",
+    "p90": "90% concluem em até",
+    "handoff": "Pediram atendente",
+    "errors": "Com erro",
+    "by_type": "Trocas x devoluções",
+    "by_type_hint": "Solicitações concluídas por tipo.",
+    "by_reason": "Motivos",
+    "by_outcome": "Resultados",
+    "retention": "Vale-compras",
+    "retention_hint": "Quantos aceitaram o vale entre os que viram a oferta.",
+    "offered": "Oferecido",
+    "accepted": "Aceito",
+    "handoff_by_reason": "Pedidos de atendente por motivo",
+    "no_handoff": "Nenhum pedido de atendente.",
+    "errors_by_code": "Erros por tipo",
+    "no_errors": "Nenhum erro no período."
+  },
+  "catalog": {
+    "empty": "Nenhuma sessão no período.",
+    "cart_note": "Carrinho = clique no botão de adicionar ao carrinho; não confirma compra.",
+    "sessions": "Sessões",
+    "product_rate": "Viram um produto",
+    "with_product": "Sessões com produto",
+    "cart_rate": "Clicaram em adicionar ao carrinho",
+    "with_cart": "Sessões com clique",
+    "searches": "Buscas feitas",
+    "no_results": "Sem resultado",
+    "top_categories": "Categorias mais vistas",
+    "top_products": "Produtos mais vistos",
+    "cart_clicks": "Cliques no carrinho",
+    "top_variations": "Tamanhos e cores mais escolhidos",
+    "top_terms": "Buscas mais feitas",
+    "no_result_terms": "Buscas sem resultado",
+    "no_no_results": "Nenhuma busca sem resultado."
+  },
+  "export": {
+    "button": "Exportar CSV",
+    "busy": "Exportando…",
+    "done": "Arquivo gerado.",
+    "sends_hint": "Exporta o período, a marca e o fluxo escolhidos. Não inclui a busca nem os filtros de clique e situação.",
+    "flow_hint": "Exporta o período e a marca escolhidos."
+  }
+}

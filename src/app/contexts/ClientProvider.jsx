@@ -1,8 +1,11 @@
 import { useMemo, useState, useEffect, createContext } from 'react'
-export const ClientContext = createContext({})
+import { createDemoClient } from '../../zaf/demoClient'
+import { isDemoByUrl } from '../config'
+
+export const ClientContext = createContext(null)
 
 export function ClientProvider({ children }) {
-  const client = useMemo(() => window.ZAFClient.init(), [])
+  const client = useMemo(() => (isDemoByUrl() ? createDemoClient() : window.ZAFClient.init()), [])
   const [appRegistered, setAppRegistered] = useState(false)
 
   useEffect(() => {

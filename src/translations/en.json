@@ -1,15 +1,240 @@
 {
   "app": {
-    "name": "Example App",
-    "short_description": "Short Description",
-    "long_description": "Long Description",
-    "installation_instructions": "Configure the following app settings, then click Install:...",
-    "title": "Example App"
+    "name": "Webview Tracking",
+    "short_description": "Follow webview sends and journeys (catalog, exchange/return and tracking).",
+    "long_description": "Dashboard for the webviews sent in conversations: sends, clicks, completions, agent requests, errors and exchange/return and catalog reports.",
+    "installation_instructions": "Enter the server address (api_host) and the access secret (api_secret), then click Install.",
+    "parameters": {
+      "api_host": {
+        "label": "Server address (api_host)",
+        "helpText": "https address of the tracking server, without a trailing slash."
+      },
+      "api_secret": {
+        "label": "Access secret (api_secret)",
+        "helpText": "Tracking API secret. It is stored securely and never reaches the browser."
+      },
+      "demo_mode": {
+        "label": "Demo mode",
+        "helpText": "Shows fictional data without querying the server."
+      }
+    }
   },
-  "ticket_sidebar": {
-    "title": "Hello from Ticket Side Bar"
+  "errors": {
+    "waking": "Waking up the server, this can take up to 1 minute",
+    "unauthorized": "Access denied. Check the secret (api_secret) in the app settings.",
+    "rate_limited": "Too many requests in a short time. Wait a minute and try again.",
+    "unavailable": "The server is unavailable right now. Try again shortly.",
+    "config": "Invalid configuration. Check the api_host (https address) in the app settings.",
+    "bad_request": "This query could not be made.",
+    "not_found": "Not found.",
+    "unknown": "Something went wrong. Try again.",
+    "retry": "Try again"
   },
-  "modal": {
-    "title": "Hello from Modal"
+  "filters": {
+    "period": "Period",
+    "periods": {
+      "today": "Today",
+      "7d": "7 days",
+      "30d": "30 days"
+    },
+    "title": "Filters",
+    "brand": "Brand",
+    "flow": "Flow",
+    "all_brands": "All brands",
+    "all_flows": "All flows"
+  },
+  "kpi": {
+    "sends": "Sent",
+    "click_rate": "Click rate",
+    "completed": "Completed",
+    "handoff": "Asked for an agent"
+  },
+  "common": {
+    "loading": "Loading",
+    "empty": "Nothing to show.",
+    "show_table": "Show data as a table",
+    "copied": "Copied",
+    "others": "Others",
+    "no_data": "No data in this period."
+  },
+  "brands": {
+    "mizuno": "Mizuno",
+    "olympikus": "Olympikus",
+    "underarmour": "Under Armour"
+  },
+  "flows": {
+    "catalog": "Catalog",
+    "reverse": "Exchange/Return",
+    "tracking": "Tracking"
+  },
+  "overview": {
+    "empty": "No sends in this period.",
+    "daily": "Sends per day",
+    "daily_alt": "Line chart with sends, clicks and completions per day. The same data is in the table below.",
+    "date": "Day",
+    "name": "Name",
+    "by_flow": "By flow",
+    "by_brand": "By brand",
+    "series": {
+      "sends": "Sent",
+      "clicked": "Clicked",
+      "completed": "Completed"
+    },
+    "cards": {
+      "sends": "Sent",
+      "send_failed": "Send failed",
+      "clicked": "Clicked",
+      "not_clicked": "Did not click",
+      "click_rate": "Click rate",
+      "completed": "Completed",
+      "completion_of_clicked": "Completion (of clicked)",
+      "completion_of_sent": "Completion (of sent)",
+      "handoff": "Asked for an agent",
+      "errors": "With error"
+    },
+    "daily_hint": "Sent, clicked and completed per day.",
+    "breakdown_hint": "Sent in the period and rates."
+  },
+  "funnel": {
+    "title": "Funnel",
+    "empty": "No sessions in this period.",
+    "sessions": "Sessions",
+    "drop_off": "Drop-off",
+    "avg_time": "Average time",
+    "hint": "How many sessions reached each step.",
+    "step": "Step"
+  },
+  "dashboard": {
+    "title": "Webview Tracking",
+    "subtitle": "Sends, clicks and completions in conversations",
+    "demo_badge": "Demo",
+    "coming_soon": "This screen arrives in the next phase.",
+    "tabs": {
+      "overview": "Overview",
+      "sends": "Sends",
+      "reverse": "Exchange/Return",
+      "catalog": "Catalog"
+    }
+  },
+  "clickStatus": {
+    "not_clicked": "No click",
+    "clicked": "Clicked",
+    "send_failed": "Send failed"
+  },
+  "status": {
+    "completed": "Completed",
+    "handoff": "Asked for an agent",
+    "error": "Ended with error",
+    "abandoned": "Abandoned",
+    "in_progress": "In progress"
+  },
+  "steps": {
+    "start": "Start",
+    "identify": "Identification",
+    "items": "Items",
+    "reasons": "Reason",
+    "address": "Address",
+    "retention": "Store credit",
+    "shipping": "Shipping",
+    "refund": "Refund",
+    "summary": "Summary",
+    "result": "Result",
+    "categories": "Categories",
+    "products": "Products",
+    "details": "Product details",
+    "submit": "Request submission"
+  },
+  "sends": {
+    "title": "Sends",
+    "search_label": "Search sends",
+    "search_placeholder": "Conversation ID, order number or name",
+    "search_button": "Search",
+    "clear": "Clear",
+    "search_min": "Type at least 3 characters.",
+    "click_status": "Click status",
+    "all_click_status": "All click statuses",
+    "status": "Status",
+    "all_status": "All statuses",
+    "empty": "No sends found with these filters.",
+    "load_more": "Load more",
+    "loading_more": "Loading…",
+    "loaded": "{{n}} sends loaded",
+    "copy": "Copy conversation ID {{id}}",
+    "open_journey": "See journey of the send from {{date}}",
+    "open_ticket": "Open ticket {{id}}",
+    "catalog_result": "Products viewed: {{views}} · Cart: {{cart}}",
+    "columns": {
+      "datetime": "Date/time",
+      "conversation": "Conversation ID",
+      "customer": "Customer",
+      "brand": "Brand",
+      "flow": "Flow",
+      "click": "Click status",
+      "status": "Status",
+      "last_step": "Last step",
+      "result": "Result",
+      "ticket": "Ticket"
+    },
+    "table_region": "Sends table (scroll to see more columns)"
+  },
+  "journey": {
+    "back": "Back to sends",
+    "title": "Send journey",
+    "timeline": "Timeline",
+    "time_in_step": "Time in step",
+    "reason": "Reason",
+    "error": "Error",
+    "no_click": "Button sent on {{date}}, no opening recorded.",
+    "send_failed": "The button was not sent: send failed on {{date}}."
+  },
+  "requestTypes": {
+    "troca": "Exchange",
+    "devolucao": "Return"
+  },
+  "reverse": {
+    "empty": "No requests in this period.",
+    "completed": "Completed requests",
+    "sessions": "Sessions",
+    "avg_time": "Average time",
+    "p90": "90% finish within",
+    "handoff": "Asked for an agent",
+    "errors": "With error",
+    "by_type": "Exchanges vs returns",
+    "by_type_hint": "Completed requests by type.",
+    "by_reason": "Reasons",
+    "by_outcome": "Outcomes",
+    "retention": "Store credit",
+    "retention_hint": "How many accepted the credit among those who saw the offer.",
+    "offered": "Offered",
+    "accepted": "Accepted",
+    "handoff_by_reason": "Agent requests by reason",
+    "no_handoff": "No agent requests.",
+    "errors_by_code": "Errors by type",
+    "no_errors": "No errors in this period."
+  },
+  "catalog": {
+    "empty": "No sessions in this period.",
+    "cart_note": "Cart = click on the add-to-cart button; it does not confirm a purchase.",
+    "sessions": "Sessions",
+    "product_rate": "Viewed a product",
+    "with_product": "Sessions with product",
+    "cart_rate": "Clicked add to cart",
+    "with_cart": "Sessions with click",
+    "searches": "Searches made",
+    "no_results": "No results",
+    "top_categories": "Most viewed categories",
+    "top_products": "Most viewed products",
+    "cart_clicks": "Cart clicks",
+    "top_variations": "Most chosen sizes and colors",
+    "top_terms": "Most searched terms",
+    "no_result_terms": "Searches with no results",
+    "no_no_results": "No searches without results."
+  },
+  "export": {
+    "button": "Export CSV",
+    "busy": "Exporting…",
+    "done": "File created.",
+    "sends_hint": "Exports the selected period, brand and flow. Does not include the search or the click and status filters.",
+    "flow_hint": "Exports the selected period and brand."
   }
 }

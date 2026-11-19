@@ -1,19 +1,37 @@
 {
-  "name": "Webview Auditoria",
+  "name": "Acompanhamento Webview",
   "author": {
     "name": "Vitor Moraes",
     "email": "v.m.moraes1997@gmail.com"
   },
-  "defaultLocale": "en",
+  "defaultLocale": "pt",
   "private": true,
   "location": {
     "support": {
-      "ticket_sidebar": {
-        "url": "http://localhost:3000/",
-        "flexible": true
+      "nav_bar": {
+        "url": "http://localhost:5273/iframe.html"
       }
     }
   },
-  "version": "1.0",
-  "frameworkVersion": "2.0"
+  "version": "0.1.0",
+  "frameworkVersion": "2.0",
+  "parameters": [
+    {
+      "name": "api_host",
+      "type": "text",
+      "required": true
+    },
+    {
+      "name": "api_secret",
+      "type": "text",
+      "secure": true,
+      "required": true
+    },
+    {
+      "name": "demo_mode",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ]
 }

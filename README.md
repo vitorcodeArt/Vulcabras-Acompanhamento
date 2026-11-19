@@ -1,220 +1,167 @@
-*Use of this software is subject to important terms and conditions as set forth in the License file*
+*O uso deste software está sujeito aos termos do arquivo [LICENSE](LICENSE).*
 
-# React App Scaffold
+# Acompanhamento Webview (app privado da Zendesk Support)
 
-## Description
+Painel no menu lateral esquerdo (`support.nav_bar`) para acompanhar as webviews enviadas nas conversas: catálogo, troca/devolução e rastreamento. O app só **lê** a API do backend descrita em [docs/api-contract.md](docs/api-contract.md), que manda no formato dos dados.
 
-This repo contains a scaffold to help developers build [apps for Zendesk products](https://developer.zendesk.com/apps/docs/apps-v2/getting_started).
+Telas: Visão geral, Envios (tabela com busca, filtros, "carregar mais", jornada de cada envio), Troca/Devolução e Catálogo (relatório + funil) e exportação CSV.
 
-## Getting Started
+> Este repositório pode ser público. Nunca coloque segredo, URL privada ou dado real em código, mocks, testes ou commits. Veja [Segurança](#segurança).
 
-### Dependencies
+## Requisitos
 
-- [Node.js](https://nodejs.org/en/) >= 18.12.1
-- [Ruby](https://www.ruby-lang.org/) = 2.6.x
+- Node.js 18.12 ou superior e npm
+- [Zendesk CLI (`zcli`)](https://github.com/zendesk/zcli) (`zcli apps --help` lista os comandos)
+- Uma conta Zendesk com permissão de administrador para instalar o app
 
-### Setup
+## Rodando localmente
 
-1. Clone or fork this repo
-2. Change (`cd`) into the `app_scaffolds/packages/react` directory
-3. Run `pnpm install`
-
-To run your app locally in Zendesk, you need the latest [Zendesk CLI](https://github.com/zendesk/zcli).
-
-### Running locally
-
-To serve the app to your Zendesk instance with `?zcli_apps=true`, follow the steps below based on your environment:
-
-#### Development Environment
-
-1. Open a new terminal and run the command:
-
-```
-pnpm run dev
+```bash
+npm install
 ```
 
-2. Open another terminal in the `app_scaffolds/packages/react` directory and run:
+### Modo demonstração (sem backend e sem Zendesk)
 
-```
-pnpm run start
-```
-
-> **Note:** Running the `pnpm run dev` command enables Hot Module Replacement (HMR), which allows you to see the changes you make to your code immediately without having to manually refresh the page. This greatly enhances the development experience.
-
-#### Production Environment
-
-1. Open a new terminal and run the command:
-
-```
-pnpm run build
+```bash
+npm run dev
+# abra http://localhost:5273/iframe.html?mock=1
 ```
 
-2. Open another terminal in the `app_scaffolds/packages/react` directory and run:
+Os dados são **fictícios**, gerados por [src/api/mock.js](src/api/mock.js) no formato do contrato. Para simular falhas, acrescente `&mock_error=wake`, `401`, `429`, `503` ou `timeout` à URL.
 
-```
-pnpm run start:prod
-```
+A porta 5273 é fixa (`--strictPort`): se estiver ocupada o Vite avisa em vez de trocar de porta, o que quebraria a URL do manifest de desenvolvimento.
 
-## But why?
+### Dentro da Zendesk, com o servidor do zcli
 
-The App Scaffold includes many features to help you maintain and scale your app. Some of the features provided by the App Scaffold are listed below. However, you don't need prior experience in any of these to be able to use the scaffold successfully.
-
-- [ECMAScript](https://esbuild.github.io/content-types/#javascript) (ES2022)
-
-  Vite supports the latest ECMAScript standards, including ES2022. This allows you to use modern JavaScript features such as class static initialization blocks, private instance methods and fields, the `at` method for arrays, public instance fields, top-level `await`, `Object.hasOwn`, and many more. Vite uses ESBuild for [fast transpilation](https://esbuild.github.io/) and Rollup for efficient module bundling and performance optimization. ESBuild ensures compatibility with the latest ECMAScript features for an enhanced development experience.
-
-- [Zendesk Garden](https://garden.zendesk.com/) React UI components
-
-  Collection of React components optimized for Zendesk products, designed to handle a range of user input devices and support right-to-left layouts, with subtle animations for enhanced user experience.
-
-- [Vite](https://vitejs.dev/) with Rollup under the hood
-
-  Vite leverages Rollup as its underlying bundler for fast, efficient module bundling and serving of your web application. It enhances development speed with lightning-fast hot module replacement (HMR) and optimized build performance.
-
-- [PostCSS](https://postcss.org/) stylesheets
-
-  PostCSS transforms your stylesheets using JavaScript plugins, supporting CSS linting, variables, mixins, future syntax transpilation, and image inlining among other features, seamlessly integrated into Vite for enhanced CSS development workflow.
-
-- [Optimized Build](https://vitejs.dev/guide/build.html)
-
-  Vite provides optimized production builds with features like code splitting, tree shaking, and pre-bundling, ensuring fast and efficient deployment of your application.
-
-- [Vitest](https://github.com/vitejs/vitest) JavaScript testing framework
-
-  Vitest, built for Vite, is used for unit and integration testing of your application. It integrates seamlessly with Vite's testing ecosystem, offering efficient and reliable test coverage for your codebase.
-
-## Folder structure
-
-The folder and file structure of the App Scaffold is as follows:
-
-| Name                           | Description                                                                                  |
-| :----------------------------- | :------------------------------------------------------------------------------------------- |
-| [`.github/`](#.github)         | The folder to store PULL_REQUEST_TEMPLATE.md, ISSUE_TEMPLATE.md and CONTRIBUTING.md, etc     |
-| [`dist/`](#dist)               | The folder in which vite packages the built version of your app                              |
-| [`spec/`](#spec)               | The folder in which all of your test files live                                              |
-| [`src/`](#src)                 | The folder in which all of your source JavaScript, CSS, templates and translation files live |
-| [`rollup/`](#src)              | static-copy-plugin and translations-loader-plugin to support i18n in the application         |
-| [`vite.config.js`](#vite)      | Configuration file for vite                                                                  |
-| [`package.json`](#packagejson) | Configuration file for Project metadata, dependencies and build scripts                      |
-
-#### dist
-
-The dist directory is created when you run the app building scripts. You will need to package this folder when submitting your app to the Zendesk Apps Marketplace. It is also the folder you will have to serve when using [ZCLI](https://developer.zendesk.com/documentation/apps/app-developer-guide/zcli/). It includes your app's manifest.json file, an assets folder with all your compiled JavaScript and CSS as well as HTML and images.
-
-#### spec
-
-The spec directory is where all your tests and test helpers live. Tests are not required to submit/upload your app to Zendesk and your test files are not included in your app's package; however, it is good practice to write tests to document functionality and prevent bugs.
-
-#### src
-
-The src directory is where your raw source code lives. The App Scaffold includes different directories for JavaScript, stylesheets, templates, images, and translations. Most of your additions will be in here (and spec, of course!).
-
-#### vite.config.js
-
-`vite.config.js` is the configuration file for [Vite](https://vitejs.dev/). Vite is a fast build tool that leverages ESBuild for transpilation and Rollup for bundling. This file includes configurations for building, testing, and other customizations.
-
-- You can modify ESBuild settings directly within this file to adjust transpilation options. For more information, see the [Vite documentation on ESBuild](https://vitejs.dev/config/#esbuild).
-
-- **Static Copy Plugin**: This plugin is used to copy static assets to the `dist` directory during the build process.
-- **Translations Loader Plugin**: This plugin processes translation files at build time, converting `.json` translation files to JavaScript objects for the app.
-
-#### package.json
-
-package.json is the configuration file for [pnpm](https://pnpm.io/), which is a package manager for JavaScript. This file includes information about your project and its dependencies. For more information on how to configure this file, see [pnpm package.json](https://pnpm.io/package_json).
-
-### I18n
-
-The I18n (internationalization) module in `/src/lib/i18n.js` provides a `t` method to look up translations based on a key. For more information, see [Using the I18n module](https://github.com/zendesk/app_scaffolds/blob/master/packages/react/doc/i18n.md).
-
-## Parameters and Settings
-
-If you need to test your app with a `parameters` section in `dist/manifest.json`, foreman might crash with a message like:
-
-> Would have prompted for a value interactively, but zcli is not listening to keyboard input.
-
-To resolve this problem, set default values for parameters or create a `settings.yml` file in the root directory of your app scaffold-based project, and populate it with your parameter names and test values. For example, using a parameters section like:
-
-```json
-{
-  "parameters": [
-    {
-      "name": "myParameter"
-    }
-  ]
-}
+```bash
+npm run dev     # terminal 1
+npm start       # terminal 2 (zcli apps:server src, porta 4567)
 ```
 
-create a `settings.yml` containing:
+Abra a Zendesk com `?zcli_apps=true` na URL. O zcli pergunta o valor de cada configuração do manifest (não vem de `.env`): `api_host`, `api_secret` e `demo_mode`. Para só ver a interface, responda `https://demo.invalid`, qualquer texto e `true`.
 
-```yaml
-myParameter: 'some value!'
+Para testar com o backend real use o pacote compilado, que inclui o `domainWhitelist`:
+
+```bash
+# .env.local (ignorado pelo git): só o hostname do backend
+echo 'VITE_API_DOMAIN=seu-backend.exemplo.com' > .env.local
+npm run build
+npm run start:prod
 ```
 
-## Testing
+## Configurações do app
 
-The App Scaffold is currently setup for testing with [Vitetest](https://vitest.dev/). To run specs, open a new terminal and run
+| Parâmetro | Tipo | Obrigatório | Descrição |
+|---|---|---|---|
+| `api_host` | texto | sim | Origem https do backend, sem barra no final (ex.: `https://seu-backend.exemplo.com`). O app acrescenta `/api/analytics`. |
+| `api_secret` | texto, `secure: true` | sim | Segredo da API (`ANALYTICS_API_SECRET` do backend). Fica guardado pela Zendesk e é aplicado no servidor da Zendesk (`{{setting.api_secret}}`); **nunca chega ao navegador**. |
+| `demo_mode` | caixa de seleção | não | Mostra dados fictícios sem consultar o servidor. |
 
-```
-pnpm run test
-```
+O cliente usa `client.request({ secure: true })` com o cabeçalho `Authorization: Bearer {{setting.api_secret}}`. Por isso o hostname do backend precisa estar no `domainWhitelist` do manifest (veja abaixo).
 
-Specs live under the `spec` directory.
+## Gerar o pacote
 
-## Deploying
+```bash
+# 1) hostname do backend (só ele, sem https:// nem caminho) em .env.local
+echo 'VITE_API_DOMAIN=seu-backend.exemplo.com' > .env.local
 
-To check that your app will pass the server-side validation check, run
+# 2) build de produção (gera dist/manifest.json com assets/iframe.html e domainWhitelist)
+npm run build
 
-```
+# 3) checagem offline do pacote (manifest, parâmetros, logos, traduções, sem segredo no bundle)
+npm run check:dist
+
+# 4) validação e empacotamento oficiais (exigem login: zcli login -i)
 zcli apps:validate dist
-```
-
-If validation is successful, you can upload the app into your Zendesk account by running
-
-```
-zcli apps:create dist
-```
-
-To update your app after it has been created in your account, run
-
-```
-zcli apps:update dist
-```
-
-Or, to create a zip archive for manual upload, run
-
-```
 zcli apps:package dist
 ```
 
-taking note of the created filename.
+O `.zip` é gerado dentro da pasta do app (normalmente em `dist/tmp/`; o comando informa o caminho). Sem `VITE_API_DOMAIN` o build avisa e o manifest sai sem `domainWhitelist`: o modo real não funciona (só o demonstração). Para um pacote só de demonstração, use `npm run check:dist -- --demo`.
 
-For more information on the Zendesk CLI please see the [documentation](https://developer.zendesk.com/documentation/apps/app-developer-guide/zcli/).
+> `src/manifest.json` aponta para `http://localhost:5273/...` porque serve o desenvolvimento. O manifest que vale para instalar é o gerado em `dist/manifest.json` (`assets/iframe.html`).
 
-## Contribute
+## Instalar (upload privado)
 
-- Put up a PR into the master branch.
-- CC and get a +1 from @zendesk/wattle.
+1. Gere o pacote (seção anterior).
+2. No **Admin Center**, vá em *Apps e integrações* → *Apps* → *Apps do Zendesk Support* e escolha *Enviar app privado* (upload). Os nomes exatos dos menus podem variar conforme a versão da interface da Zendesk.
+3. Envie o `.zip`, preencha `api_host` e `api_secret` (e deixe `demo_mode` desmarcado) e clique em **Instalar**.
+4. O app aparece como um ícone (gráfico de barras) no menu lateral esquerdo.
 
-## Bugs
+### Restrição por função
 
-Submit Issues via [GitHub](https://github.com/zendesk/app_scaffolds/issues/new) or email support@zendesk.com.
+A tela mostra o nome do cliente (`customer_name`) e as jornadas das conversas. Depois de instalar, restrinja o app às funções que precisam dele (por exemplo analistas e supervisores) nas opções do app instalado, em *Apps do Zendesk Support* → *Gerenciar* → opções do app (restrição por função). Sem restrição, qualquer agente com acesso ao Support vê o app.
 
-## Useful Links
+## Atualizar uma versão
 
-Links to maintaining team, confluence pages, Datadog dashboard, Kibana logs, etc
+1. Aumente `version` em [src/manifest.json](src/manifest.json).
+2. `npm run build`, `npm run check:dist`, `zcli apps:validate dist`.
+3. Atualize o app já instalado:
+   ```bash
+   zcli apps:update dist
+   ```
+   `apps:update` atualiza um app privado que já foi criado pelo `zcli apps:create dist` (o zcli guarda o id em `dist/zcli.apps.config.json`, ignorado pelo git). Alternativa: enviar o novo `.zip` pelo Admin Center.
+4. As configurações já salvas (`api_host`, `api_secret`) são mantidas.
 
-- https://developer.zendesk.com/
-- https://github.com/zendesk/zendesk_apps_tools
-- https://esbuild.github.io/
-- https://vitejs.dev/
-- https://developer.zendesk.com/documentation/apps/build-an-app/using-react-in-a-support-app/
+## Trocar o segredo
 
-## Copyright and license
+O segredo não precisa de novo pacote: ele é só uma configuração do app.
 
-Copyright 2018 Zendesk
+1. Gere um novo valor e atualize `ANALYTICS_API_SECRET` no backend. A partir daí o app responde "Acesso negado" até o passo 2.
+2. No Admin Center, abra as configurações do app instalado, cole o novo valor em `api_secret` e salve.
+3. Confirme abrindo o app: a Visão geral deve carregar. Depois de salvo, o valor não é exibido de volta.
 
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
+Nunca cole o segredo em issues, commits, prints ou no `.env`.
 
-You may obtain a copy of the License at
-http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+## Estrutura
+
+```
+docs/api-contract.md     contrato da API (fonte única do formato dos dados)
+src/api/                 cliente (client.js), erros, hooks e modo demonstração (mock.js)
+src/app/                 telas (routes/), componentes, tema (theme.js)
+src/lib/                 datas (fuso America/Sao_Paulo), formatação, clipboard, download
+src/translations/        pt.json e en.json (textos fixos da interface e do app na Zendesk)
+rollup/, vite.config.js  build: gera dist/manifest.json, traduções e o domainWhitelist
+scripts/check-dist.mjs   checagem offline do pacote
+spec/                    testes (Vitest + Testing Library)
+```
+
+## Comandos
+
+| Comando | O que faz |
+|---|---|
+| `npm run dev` | servidor de desenvolvimento (porta 5273) |
+| `npm start` / `npm run start:prod` | `zcli apps:server` com `src` / `dist` |
+| `npm run build` | build de produção em `dist/` |
+| `npm run check:dist` | checagem offline do pacote |
+| `npm test` / `npm run test:run` | testes (modo watch / uma vez) |
+| `npm run lint` | ESLint |
+
+## Como o app trata erros da API
+
+| Situação | Comportamento |
+|---|---|
+| Servidor dormindo (Render gratuito), timeout de 60 s, 502/503/504 sem corpo do contrato | "Acordando o servidor, isso pode levar até 1 minuto", **1 tentativa automática** e botão "Tentar de novo" |
+| 401 | "Acesso negado": confira o `api_secret` |
+| 429 | "Muitas consultas": aguarde (limite de 60 por minuto) |
+| 503 com corpo do contrato | servidor no ar, mas sem segredo configurado; não é repetido |
+| 400/404 | mostra o texto curto em português que a API devolve |
+
+## Rótulos
+
+Os rótulos (`label`) vêm da API. O app só traduz o que é fixo da interface. Por enquanto a API não manda rótulo para marca, fluxo, status do clique, situação e última etapa: o app usa os textos fixos de `pt.json`/`en.json` (conforme a seção 4 do contrato) e passa a usar `click_status_label`, `session_status_label` e `last_step_label` automaticamente se o backend os enviar.
+
+## Segurança
+
+- O segredo só existe como configuração `secure` da Zendesk; o código usa apenas o texto `{{setting.api_secret}}`.
+- O app **não** chama a API do webview direto do navegador: toda requisição passa pelo proxy do ZAF.
+- Nada é guardado em `localStorage`/`sessionStorage`/cookies. A aba e a jornada abertas ficam no hash da URL.
+- Mocks e testes usam só dados fictícios (nomes genéricos, IDs `demo…`, hosts `*.invalid`).
+- `.env.local`, `zcli.apps.config.json`, `*.zip` e `dist/` são ignorados pelo git. O hostname do backend só entra no manifest, via `VITE_API_DOMAIN`, nunca no código.
+- `npm run check:dist` falha se o bundle tiver um token `Bearer` literal ou um host `onrender.com`.
+
+## Limitações conhecidas
+
+- `zcli apps:validate` e `zcli apps:package` exigem login e não foram executados na construção do projeto; rode-os antes de instalar.
+- Não foi possível confirmar dentro da Zendesk: o download do CSV a partir do iframe do app e o comportamento do app com a largura real da área do menu lateral.
+- A exportação CSV de Envios leva só período, marca e fluxo (é o que o contrato aceita); não inclui busca nem filtros de clique e situação.
+- A proteção contra injeção de fórmula no CSV (apóstrofo antes de `=`, `+`, `-`, `@`) é feita pelo backend.

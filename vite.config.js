@@ -23,7 +23,7 @@ export default ({ mode }) => {
           { src: resolve(__dirname, 'src/assets/*'), dest: './' },
           { src: resolve(__dirname, 'src/manifest.json'), dest: '../', modifier: changeLocation },
           {
-            src: resolve(__dirname, 'src/translations/en.json'),
+            src: resolve(__dirname, 'src/translations/{pt,en}.json'),
             dest: '../translations',
             modifier: extractMarketplaceTranslation
           }
@@ -40,7 +40,7 @@ export default ({ mode }) => {
     build: {
       rollupOptions: {
         input: {
-          main: resolve(__dirname, 'src/index.html')
+          main: resolve(__dirname, 'src/iframe.html')
         },
         output: {
           entryFileNames: `[name].js`,

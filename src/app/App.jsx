@@ -1,27 +1,27 @@
-import { lazy, Suspense } from 'react'
-import { useLocation } from './hooks/useClient'
+import { Suspense } from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ThemeProvider } from '@zendeskgarden/react-theming'
 import { TranslationProvider } from './contexts/TranslationProvider'
-import { DEFAULT_THEME, ThemeProvider } from '@zendeskgarden/react-theming'
+import { ApiProvider } from './contexts/ApiProvider'
+import Dashboard from './routes/Dashboard'
+import { theme } from './theme'
 
-const TicketSideBar = lazy(() => import('./locations/TicketSideBar'))
-const Modal = lazy(() => import('./locations/Modal'))
-
-const LOCATIONS = {
-  ticket_sidebar: TicketSideBar,
-  modal: Modal,
-  default: () => null
-}
+// O cliente da API já faz o retry automático; o react-query só guarda o cache.
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false, refetchOnWindowFocus: false, staleTime: 60_000 } }
+})
 
 function App() {
-  const location = useLocation()
-  const Location = LOCATIONS[location] || LOCATIONS.default
-
   return (
-    <ThemeProvider theme={{ ...DEFAULT_THEME }}>
+    <ThemeProvider theme={theme}>
       <TranslationProvider>
-        <Suspense fallback={<span>Loading...</span>}>
-          <Location />
-        </Suspense>
+        <ApiProvider>
+          <QueryClientProvider client={queryClient}>
+            <Suspense fallback={null}>
+              <Dashboard />
+            </Suspense>
+          </QueryClientProvider>
+        </ApiProvider>
       </TranslationProvider>
     </ThemeProvider>
   )
