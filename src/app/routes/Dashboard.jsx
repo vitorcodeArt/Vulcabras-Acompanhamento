@@ -19,9 +19,11 @@ import { ReportStack } from '../components/ReportLayout'
 import ExportButton from '../components/ExportButton'
 
 const Page = styled.main`
-  max-width: 1440px;
+  width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 20px;
 `
 

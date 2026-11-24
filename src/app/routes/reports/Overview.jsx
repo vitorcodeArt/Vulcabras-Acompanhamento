@@ -8,6 +8,7 @@ import { formatNumber, formatRate, formatShortDate } from '../../../lib/format'
 import QueryBoundary from '../../components/QueryBoundary'
 import KpiCard from '../../components/KpiCard'
 import { Card, CardHint, CardTitle } from '../../components/Card'
+import { TableScroll } from '../../components/ReportLayout'
 
 const Stack = styled.div`
   display: grid;
@@ -22,10 +23,10 @@ const Kpis = styled.div`
 
 const Split = styled.div`
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 5fr) minmax(0, 4fr);
   gap: 20px;
   align-items: start;
-  @media (max-width: 960px) {
+  @media (max-width: 1100px) {
     grid-template-columns: minmax(0, 1fr);
   }
 `
@@ -184,26 +185,28 @@ function DailyChart({ daily }) {
       </div>
       <Details>
         <summary>{t('common.show_table')}</summary>
-        <Table aria-label={t('overview.daily')} size="small">
-          <Head>
-            <HeaderRow>
-              <HeaderCell>{t('overview.date')}</HeaderCell>
-              {Object.values(names).map((n) => (
-                <HeaderCell key={n}>{n}</HeaderCell>
+        <TableScroll>
+          <Table aria-label={t('overview.daily')} size="small">
+            <Head>
+              <HeaderRow>
+                <HeaderCell>{t('overview.date')}</HeaderCell>
+                {Object.values(names).map((n) => (
+                  <HeaderCell key={n}>{n}</HeaderCell>
+                ))}
+              </HeaderRow>
+            </Head>
+            <Body>
+              {data.map((d) => (
+                <Row key={d.date}>
+                  <Cell>{d.label}</Cell>
+                  <Cell>{formatNumber(d.sends)}</Cell>
+                  <Cell>{formatNumber(d.clicked)}</Cell>
+                  <Cell>{formatNumber(d.completed)}</Cell>
+                </Row>
               ))}
-            </HeaderRow>
-          </Head>
-          <Body>
-            {data.map((d) => (
-              <Row key={d.date}>
-                <Cell>{d.label}</Cell>
-                <Cell>{formatNumber(d.sends)}</Cell>
-                <Cell>{formatNumber(d.clicked)}</Cell>
-                <Cell>{formatNumber(d.completed)}</Cell>
-              </Row>
-            ))}
-          </Body>
-        </Table>
+            </Body>
+          </Table>
+        </TableScroll>
       </Details>
     </Card>
   )
@@ -236,30 +239,32 @@ function Breakdown({ title, rows, nameOf }) {
       </Rows>
       <Details>
         <summary>{t('common.show_table')}</summary>
-        <Table aria-label={title} size="small">
-          <Head>
-            <HeaderRow>
-              <HeaderCell>{t('overview.name')}</HeaderCell>
-              <HeaderCell>{t('overview.cards.sends')}</HeaderCell>
-              <HeaderCell>{t('overview.cards.clicked')}</HeaderCell>
-              <HeaderCell>{t('overview.cards.click_rate')}</HeaderCell>
-              <HeaderCell>{t('overview.cards.completed')}</HeaderCell>
-              <HeaderCell>{t('overview.cards.completion_of_sent')}</HeaderCell>
-            </HeaderRow>
-          </Head>
-          <Body>
-            {rows.map((r) => (
-              <Row key={nameOf(r).key}>
-                <Cell>{nameOf(r).text}</Cell>
-                <Cell>{formatNumber(r.sends)}</Cell>
-                <Cell>{formatNumber(r.clicked)}</Cell>
-                <Cell>{formatRate(r.click_rate)}</Cell>
-                <Cell>{formatNumber(r.completed)}</Cell>
-                <Cell>{formatRate(r.completion_rate_of_sent)}</Cell>
-              </Row>
-            ))}
-          </Body>
-        </Table>
+        <TableScroll>
+          <Table aria-label={title} size="small">
+            <Head>
+              <HeaderRow>
+                <HeaderCell>{t('overview.name')}</HeaderCell>
+                <HeaderCell>{t('overview.cards.sends')}</HeaderCell>
+                <HeaderCell>{t('overview.cards.clicked')}</HeaderCell>
+                <HeaderCell>{t('overview.cards.click_rate')}</HeaderCell>
+                <HeaderCell>{t('overview.cards.completed')}</HeaderCell>
+                <HeaderCell>{t('overview.cards.completion_of_sent')}</HeaderCell>
+              </HeaderRow>
+            </Head>
+            <Body>
+              {rows.map((r) => (
+                <Row key={nameOf(r).key}>
+                  <Cell>{nameOf(r).text}</Cell>
+                  <Cell>{formatNumber(r.sends)}</Cell>
+                  <Cell>{formatNumber(r.clicked)}</Cell>
+                  <Cell>{formatRate(r.click_rate)}</Cell>
+                  <Cell>{formatNumber(r.completed)}</Cell>
+                  <Cell>{formatRate(r.completion_rate_of_sent)}</Cell>
+                </Row>
+              ))}
+            </Body>
+          </Table>
+        </TableScroll>
       </Details>
     </Card>
   )
