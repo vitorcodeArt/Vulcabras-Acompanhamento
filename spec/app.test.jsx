@@ -233,3 +233,63 @@ describe('Exportar CSV', () => {
     expect(clicked.length).toBe(0)
   })
 })
+
+describe('Diagnóstico do erro na jornada', () => {
+  beforeEach(() => {
+    cleanup()
+    vi.clearAllMocks()
+    window.history.pushState({}, '', '/')
+    vi.stubGlobal('ZAFClient', { init: vi.fn().mockReturnValue(mockClient) })
+  })
+
+  // Varre os 30 dias que o mock gera, procurando um envio com erro que satisfaça o predicado
+  const findSend = async (predicate) => {
+    const { mockTransport } = await import('../src/api/mock')
+    const { addDays, today } = await import('../src/lib/dates')
+    const range = { from: addDays(today(), -30), to: today(), status: 'error', limit: 100 }
+    let cursor
+    do {
+      const { data } = await mockTransport({ path: '/sends', params: { ...range, cursor } })
+      for (const item of data.items) {
+        const detail = await mockTransport({ path: `/sends/${item.send_id}` })
+        if (predicate(detail.data.events)) return item.send_id
+      }
+      cursor = data.next_cursor
+    } while (cursor)
+    return null
+  }
+
+  it('pedido não elegível: explica o motivo em português e mostra o código bruto', async () => {
+    const id = await findSend((events) => events.some((e) => e.meta?.eligible === false))
+    expect(id).not.toBeNull()
+    window.location.hash = `#/envios/${id}`
+    renderApp()
+    expect(await screen.findByText('Diagnóstico do erro', {}, { timeout: 5000 })).toBeDefined()
+    expect(screen.getByText('Pedido não elegível para troca ou devolução')).toBeDefined()
+    expect(
+      screen.getByText('Já existe uma solicitação de troca ativa para o pedido; Orientar o cliente a procurar o SAC')
+    ).toBeDefined()
+    expect(screen.getAllByText(/alreadyHaveActiveExchangeRequest contactSAC/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Terminou com erro').length).toBeGreaterThan(0) // status corrigido: não é "Abandonou"
+    expect(screen.getAllByText('Tela de erro').length).toBeGreaterThanOrEqual(2) // última etapa e linha do tempo
+  })
+
+  it('falha de integração: mostra a ferramenta, o status HTTP e a tentativa', async () => {
+    const id = await findSend((events) => events.some((e) => e.event === 'api_call' && e.meta?.ok === false))
+    expect(id).not.toBeNull()
+    window.location.hash = `#/envios/${id}`
+    renderApp()
+    expect(await screen.findByText('Falha na integração: create_reverse_order', {}, { timeout: 5000 })).toBeDefined()
+    expect(screen.getAllByText('Falha temporária no Troque').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('503').length).toBeGreaterThan(0)
+  })
+
+  it('jornada que concluiu não mostra diagnóstico', async () => {
+    const { mockTransport } = await import('../src/api/mock')
+    const { data } = await mockTransport({ path: '/sends', params: { status: 'completed', flow: 'reverse', limit: 1 } })
+    window.location.hash = `#/envios/${data.items[0].send_id}`
+    renderApp()
+    await screen.findByText('Linha do tempo', {}, { timeout: 5000 })
+    expect(screen.queryByText('Diagnóstico do erro')).toBeNull()
+  })
+})

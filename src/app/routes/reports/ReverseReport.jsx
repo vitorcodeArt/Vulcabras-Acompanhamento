@@ -117,7 +117,9 @@ export default function ReverseReport({ params }) {
             />
             <BarList
               title={r('errors_by_code')}
-              items={toItems(d.errors_by_code, t, (row) => row.label ?? row.key)}
+              items={toItems(d.errors_by_code, t, (row) =>
+                row.key === 'desconhecido' ? r('unknown_error') : (row.label ?? row.key)
+              )}
               emptyText={r('no_errors')}
             />
 

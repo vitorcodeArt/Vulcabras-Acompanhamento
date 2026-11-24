@@ -55,7 +55,9 @@
     "show_table": "Show data as a table",
     "copied": "Copied",
     "others": "Others",
-    "no_data": "No data in this period."
+    "no_data": "No data in this period.",
+    "yes": "Yes",
+    "no": "No"
   },
   "brands": {
     "mizuno": "Mizuno",
@@ -142,7 +144,8 @@
     "categories": "Categories",
     "products": "Products",
     "details": "Product details",
-    "submit": "Request submission"
+    "submit": "Request submission",
+    "error": "Error screen"
   },
   "sends": {
     "title": "Sends",
@@ -185,7 +188,8 @@
     "reason": "Reason",
     "error": "Error",
     "no_click": "Button sent on {{date}}, no opening recorded.",
-    "send_failed": "The button was not sent: send failed on {{date}}."
+    "send_failed": "The button was not sent: send failed on {{date}}.",
+    "other_details": "Other details"
   },
   "requestTypes": {
     "troca": "Exchange",
@@ -210,7 +214,8 @@
     "handoff_by_reason": "Agent requests by reason",
     "no_handoff": "No agent requests.",
     "errors_by_code": "Errors by type",
-    "no_errors": "No errors in this period."
+    "no_errors": "No errors in this period.",
+    "unknown_error": "No code recorded"
   },
   "catalog": {
     "empty": "No sessions in this period.",
@@ -236,5 +241,70 @@
     "done": "File created.",
     "sends_hint": "Exports the selected period, brand and flow. Does not include the search or the click and status filters.",
     "flow_hint": "Exports the selected period and brand."
+  },
+  "diag": {
+    "title": "Error diagnosis",
+    "hint": "What the system recorded. Personal data is masked.",
+    "integration_failed": "Integration failure: {{tool}}",
+    "service": "service",
+    "ineligible": "Order not eligible for exchange or return",
+    "error_shown": "Error shown to the customer",
+    "handoff": "Customer sent to an agent",
+    "unknown": "The journey ended with an error, but no detail was recorded.",
+    "error_type": "Error type",
+    "upstream": "Integration response",
+    "reason": "Reason",
+    "step": "Step",
+    "shown_to_customer": "Message shown to the customer"
+  },
+  "meta": {
+    "eligible": "Eligible",
+    "existing_reverses": "Existing requests",
+    "reasons_available": "Available reasons",
+    "id_kind": "Document provided",
+    "step_mode": "Step mode",
+    "order_hash": "Order (code)",
+    "service": "Service",
+    "tool": "Tool",
+    "ok": "Call result",
+    "ok_true": "Success",
+    "ok_false": "Failed",
+    "attempt": "Attempt",
+    "http_status": "HTTP status",
+    "upstream_code": "Integration response",
+    "detail": "Detail",
+    "ineligibility_code": "Ineligibility reason",
+    "outcome": "Outcome",
+    "type": "Type",
+    "sub_reason": "Sub-reason",
+    "items": "Items",
+    "photos": "Photos",
+    "field": "Field",
+    "retention_accepted": "Store credit accepted",
+    "ticket_id": "Ticket",
+    "category": "Category",
+    "product_title": "Product",
+    "product_id": "Product code",
+    "sku": "SKU",
+    "size": "Size",
+    "color": "Color",
+    "query": "Search term",
+    "results_count": "Results"
+  },
+  "ineligibility": {
+    "alreadyHaveActiveExchangeRequest": "There is already an active exchange request for the order",
+    "contactSAC": "Tell the customer to contact customer service"
+  },
+  "outcomes": {
+    "approved_with_shipping": "Approved, with shipping",
+    "approved_without_shipping": "Approved, no shipping booked",
+    "pending_analysis": "Under review",
+    "approved_shipping_failed": "Approved, shipping failed"
+  },
+  "flowTypes": {
+    "exchange": "Exchange",
+    "refund": "Return",
+    "troca": "Exchange",
+    "devolucao": "Return"
   }
 }

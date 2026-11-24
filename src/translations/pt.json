@@ -55,7 +55,9 @@
     "show_table": "Ver dados em tabela",
     "copied": "Copiado",
     "others": "Outros",
-    "no_data": "Sem dados no período."
+    "no_data": "Sem dados no período.",
+    "yes": "Sim",
+    "no": "Não"
   },
   "brands": {
     "mizuno": "Mizuno",
@@ -142,7 +144,8 @@
     "categories": "Categorias",
     "products": "Produtos",
     "details": "Detalhe do produto",
-    "submit": "Envio da solicitação"
+    "submit": "Envio da solicitação",
+    "error": "Tela de erro"
   },
   "sends": {
     "title": "Envios",
@@ -185,7 +188,8 @@
     "reason": "Motivo",
     "error": "Erro",
     "no_click": "Botão enviado em {{date}}, sem abertura registrada.",
-    "send_failed": "O botão não foi enviado: falha no envio em {{date}}."
+    "send_failed": "O botão não foi enviado: falha no envio em {{date}}.",
+    "other_details": "Outros detalhes"
   },
   "requestTypes": {
     "troca": "Troca",
@@ -210,7 +214,8 @@
     "handoff_by_reason": "Pedidos de atendente por motivo",
     "no_handoff": "Nenhum pedido de atendente.",
     "errors_by_code": "Erros por tipo",
-    "no_errors": "Nenhum erro no período."
+    "no_errors": "Nenhum erro no período.",
+    "unknown_error": "Sem código registrado"
   },
   "catalog": {
     "empty": "Nenhuma sessão no período.",
@@ -236,5 +241,70 @@
     "done": "Arquivo gerado.",
     "sends_hint": "Exporta o período, a marca e o fluxo escolhidos. Não inclui a busca nem os filtros de clique e situação.",
     "flow_hint": "Exporta o período e a marca escolhidos."
+  },
+  "diag": {
+    "title": "Diagnóstico do erro",
+    "hint": "O que o sistema registrou. Dados pessoais aparecem mascarados.",
+    "integration_failed": "Falha na integração: {{tool}}",
+    "service": "serviço",
+    "ineligible": "Pedido não elegível para troca ou devolução",
+    "error_shown": "Erro exibido ao cliente",
+    "handoff": "Cliente enviado ao atendente",
+    "unknown": "A jornada terminou com erro, mas nenhum detalhe foi registrado.",
+    "error_type": "Tipo de erro",
+    "upstream": "Retorno da integração",
+    "reason": "Motivo",
+    "step": "Etapa",
+    "shown_to_customer": "Mensagem mostrada ao cliente"
+  },
+  "meta": {
+    "eligible": "Elegível",
+    "existing_reverses": "Solicitações já existentes",
+    "reasons_available": "Motivos disponíveis",
+    "id_kind": "Documento informado",
+    "step_mode": "Modo da etapa",
+    "order_hash": "Pedido (código)",
+    "service": "Serviço",
+    "tool": "Ferramenta",
+    "ok": "Resultado da chamada",
+    "ok_true": "Sucesso",
+    "ok_false": "Falhou",
+    "attempt": "Tentativa",
+    "http_status": "Status HTTP",
+    "upstream_code": "Retorno da integração",
+    "detail": "Detalhe",
+    "ineligibility_code": "Motivo da inelegibilidade",
+    "outcome": "Resultado",
+    "type": "Tipo",
+    "sub_reason": "Submotivo",
+    "items": "Itens",
+    "photos": "Fotos",
+    "field": "Campo",
+    "retention_accepted": "Vale-compras aceito",
+    "ticket_id": "Ticket",
+    "category": "Categoria",
+    "product_title": "Produto",
+    "product_id": "Código do produto",
+    "sku": "SKU",
+    "size": "Tamanho",
+    "color": "Cor",
+    "query": "Termo buscado",
+    "results_count": "Resultados"
+  },
+  "ineligibility": {
+    "alreadyHaveActiveExchangeRequest": "Já existe uma solicitação de troca ativa para o pedido",
+    "contactSAC": "Orientar o cliente a procurar o SAC"
+  },
+  "outcomes": {
+    "approved_with_shipping": "Aprovada, com envio",
+    "approved_without_shipping": "Aprovada, sem envio contratado",
+    "pending_analysis": "Em análise",
+    "approved_shipping_failed": "Aprovada, envio falhou"
+  },
+  "flowTypes": {
+    "exchange": "Troca",
+    "refund": "Devolução",
+    "troca": "Troca",
+    "devolucao": "Devolução"
   }
 }

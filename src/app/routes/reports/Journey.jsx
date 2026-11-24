@@ -12,6 +12,7 @@ import LoadingState from '../../components/LoadingState'
 import { ClickChip, SituationChip } from '../../components/StatusChip'
 import TicketLink from '../../components/TicketLink'
 import { lastStepText, resultText } from './sendFields'
+import { diagnose, metaDetails } from './diagnosis'
 
 const Stack = styled.div`
   display: grid;
@@ -148,6 +149,124 @@ const ErrorBox = styled.span`
   `}
 `
 
+const TONES = {
+  danger: ['#FDE8E6', '#8C1D18', '#B3261E'],
+  warning: ['#FFF1D6', '#7A4600', '#B26A00']
+}
+
+const Finding = styled.li`
+  list-style: none;
+  padding: 14px 16px;
+  border-radius: ${(p) => p.theme.brand.radiusSm};
+  ${(p) => css`
+    background: ${TONES[p.$tone][0]};
+    color: ${TONES[p.$tone][1]};
+    border-left: 5px solid ${TONES[p.$tone][2]};
+  `}
+`
+
+const FindingTitle = styled.p`
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+`
+
+const FindingLines = styled.dl`
+  margin: 8px 0 0;
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 16px;
+  font-size: 14px;
+  dt {
+    opacity: 0.85;
+  }
+  dd {
+    margin: 0;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+`
+
+const Findings = styled.ul`
+  margin: 16px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+`
+
+const Hint = styled.p`
+  margin: 0;
+  font-size: 13px;
+  color: ${(p) => p.theme.brand.muted};
+`
+
+const Chip = styled.span`
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: ${(p) => p.theme.brand.blue50};
+  border: 1px solid ${(p) => p.theme.brand.blue100};
+  color: ${(p) => p.theme.brand.text};
+  overflow-wrap: anywhere;
+  strong {
+    font-weight: 600;
+  }
+`
+
+const DetailChips = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+`
+
+const More = styled.details`
+  font-size: 12px;
+  color: ${(p) => p.theme.brand.muted};
+  summary {
+    cursor: pointer;
+    color: ${(p) => p.theme.brand.blue700};
+  }
+  summary:focus-visible {
+    outline: 3px solid ${(p) => p.theme.brand.blue500};
+    outline-offset: 2px;
+  }
+`
+
+/** Detalhes do `meta` de um evento, com rótulo em português e dados sensíveis mascarados. */
+function EventDetails({ event, helpers }) {
+  const { rows, other } = metaDetails(event.meta, helpers)
+  if (!rows.length && !other.length) return null
+  return (
+    <>
+      {rows.length > 0 && (
+        <DetailChips>
+          {rows.map((row) => (
+            <Chip key={row.id}>
+              {row.label}: <strong>{row.value}</strong>
+            </Chip>
+          ))}
+        </DetailChips>
+      )}
+      {other.length > 0 && (
+        <More>
+          <summary>{helpers.t('journey.other_details')}</summary>
+          <DetailChips>
+            {other.map((row) => (
+              <Chip key={row.id}>
+                {row.label}: <strong>{row.value}</strong>
+              </Chip>
+            ))}
+          </DetailChips>
+        </More>
+      )}
+    </>
+  )
+}
+
 function Fact({ term, children }) {
   return (
     <div>
@@ -163,6 +282,8 @@ export default function Journey({ sendId, onBack }) {
   const label = useLabel()
   const query = useApiQuery(`/sends/${encodeURIComponent(sendId)}`)
   const item = query.data?.data
+  const helpers = { t, label }
+  const findings = item ? diagnose(item, item.events, helpers) : []
 
   return (
     <Stack>
@@ -204,6 +325,33 @@ export default function Journey({ sendId, onBack }) {
             </Facts>
           </Card>
 
+          {findings.length > 0 && (
+            <Card>
+              <CardTitle id="diagnosis-title">{t('diag.title')}</CardTitle>
+              <Hint>{t('diag.hint')}</Hint>
+              <Findings aria-labelledby="diagnosis-title">
+                {findings.map((finding) => (
+                  <Finding key={finding.id} $tone={finding.tone}>
+                    <FindingTitle>
+                      <Icon name="alert" size={18} />
+                      {finding.title}
+                    </FindingTitle>
+                    {finding.lines.length > 0 && (
+                      <FindingLines>
+                        {finding.lines.map((l) => (
+                          <div key={l.id} style={{ display: 'contents' }}>
+                            <dt>{l.label}</dt>
+                            <dd>{l.value}</dd>
+                          </div>
+                        ))}
+                      </FindingLines>
+                    )}
+                  </Finding>
+                ))}
+              </Findings>
+            </Card>
+          )}
+
           <Card>
             <CardTitle id="timeline-title">{t('journey.timeline')}</CardTitle>
             {item.events?.length ? (
@@ -225,6 +373,7 @@ export default function Journey({ sendId, onBack }) {
                           {t('journey.reason')}: {event.meta.reason}
                         </Sub>
                       )}
+                      <EventDetails event={event} helpers={helpers} />
                       {event.error_code && (
                         <ErrorBox>
                           <Icon name="alert" size={14} />

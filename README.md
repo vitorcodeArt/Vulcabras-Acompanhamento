@@ -150,6 +150,14 @@ spec/                    testes (Vitest + Testing Library)
 
 Os rótulos (`label`) vêm da API. O app só traduz o que é fixo da interface. Por enquanto a API não manda rótulo para marca, fluxo, status do clique, situação e última etapa: o app usa os textos fixos de `pt.json`/`en.json` (conforme a seção 4 do contrato) e passa a usar `click_status_label`, `session_status_label` e `last_step_label` automaticamente se o backend os enviar.
 
+## Diagnóstico do erro na jornada
+
+Ao abrir um envio, a tela mostra um cartão **"Diagnóstico do erro"** quando a jornada teve erro, falha de integração ou pediu atendente: o tipo do erro, o retorno da integração (ferramenta, status HTTP, tentativas), o motivo de inelegibilidade do pedido e a mensagem que o cliente viu. Cada evento da linha do tempo também lista seus detalhes (`meta`) com rótulo em português.
+
+- Os textos de erro e de integração são **mascarados duas vezes** (no backend, antes de gravar, e no app, antes de exibir): e-mail, links, números longos (CPF, telefone, pedido) e códigos opacos viram `•••`. Nomes próprios não são reconhecidos, por isso só entram textos do sistema.
+- O cartão depende de campos que o backend passou a gravar (`error_shown.meta.detail`, `api_call.meta.upstream_code` e `ineligibility_code`). Jornadas **anteriores** a essa versão mostram só o que já estava gravado (por exemplo, o `ineligibility_code` do evento do servidor).
+- As palavras `alreadyHaveActiveExchangeRequest` e `contactSAC` têm tradução fixa nos arquivos de tradução. As demais aparecem como o Troque as envia.
+
 ## Segurança
 
 - O segredo só existe como configuração `secure` da Zendesk; o código usa apenas o texto `{{setting.api_secret}}`.

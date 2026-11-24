@@ -35,6 +35,7 @@ export default ({ mode }) => {
       include: ['../{test,spec}/**/*.{test,spec}.{js,ts,jsx}'],
       exclude: ['**/node_modules/**', '**/dist/**'],
       globals: true,
+      testTimeout: 15000,
       environment: 'jsdom'
     },
     build: {

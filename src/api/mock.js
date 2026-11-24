@@ -33,7 +33,8 @@ const STEP_LABELS = {
   categories: 'Categorias',
   products: 'Produtos',
   details: 'Detalhe do produto',
-  submit: 'Envio da solicitação'
+  submit: 'Envio da solicitação',
+  error: 'Tela de erro'
 }
 const EVENT_LABELS = {
   webview_opened: 'Abriu a webview',
@@ -210,12 +211,40 @@ function genEvents(row, { rand, pick, between, now, sentAt }) {
   const roll = rand()
   const end =
     roll < 0.3 ? 'completed' : roll < 0.45 ? 'handoff' : roll < 0.6 ? 'error' : fresh ? 'in_progress' : 'abandoned'
-  const lastIndex = end === 'completed' ? REVERSE_STEPS.length - 1 : between(1, REVERSE_STEPS.length - 2)
+  // Erros: pedido não elegível (termina na identificação), falha da integração ou erro simples
+  const errorKind = end === 'error' ? pick(['ineligible', 'integration', 'plain']) : null
+  const lastIndex =
+    end === 'completed'
+      ? REVERSE_STEPS.length - 1
+      : errorKind === 'ineligible'
+        ? 1
+        : between(1, REVERSE_STEPS.length - 2)
   let retentionOffered = false
   for (let i = 0; i <= lastIndex; i += 1) {
     const step = REVERSE_STEPS[i]
     tick(3, 20)
     push('step_viewed', step)
+    if (step === 'identify') {
+      const ineligible = errorKind === 'ineligible'
+      push('api_call', step, {
+        source: 'server',
+        duration_ms: between(1500, 3500),
+        meta: { service: 'troque', tool: 'prepare_reverse_order', ok: true, attempt: 1, http_status: null }
+      })
+      if (ineligible) {
+        push('step_completed', step, {
+          source: 'server',
+          meta: {
+            id_kind: 'cpf',
+            reasons: 0,
+            eligible: false,
+            order_hash: `demo${between(100000, 999999)}abcdef0123456789`,
+            existing_reverses: 1,
+            ineligibility_code: 'alreadyHaveActiveExchangeRequest contactSAC'
+          }
+        })
+      }
+    }
     if (step === 'retention') retentionOffered = true
     if (step === 'reasons') {
       push('step_completed', step, { duration_ms: between(8, 70) * 1000, meta: { reason: pick(REASONS) } })
@@ -227,7 +256,39 @@ function genEvents(row, { rand, pick, between, now, sentAt }) {
   tick(2, 10)
   if (end === 'handoff')
     push('handoff_requested', REVERSE_STEPS[lastIndex], { source: 'server', meta: { reason: pick(HANDOFF_REASONS) } })
-  if (end === 'error') push('error_shown', REVERSE_STEPS[lastIndex], { error_code: pick(Object.keys(ERROR_LABELS)) })
+  if (errorKind === 'ineligible') {
+    push('error_shown', 'identify', {
+      error_code: 'ORDER_NOT_ELIGIBLE',
+      meta: {
+        ineligibility_code: 'alreadyHaveActiveExchangeRequest contactSAC',
+        detail: 'Este pedido já possui uma solicitação de troca ativa. Fale com o SAC.'
+      }
+    })
+    push('step_completed', 'identify', { duration_ms: between(20, 60) * 1000 })
+    push('step_viewed', 'error')
+  } else if (errorKind === 'integration') {
+    const step = REVERSE_STEPS[lastIndex]
+    push('api_call', step, {
+      source: 'server',
+      duration_ms: between(8000, 30000),
+      error_code: 'TEMPORARY_FAILURE',
+      meta: {
+        service: 'troque',
+        tool: 'create_reverse_order',
+        ok: false,
+        attempt: 2,
+        http_status: 503,
+        upstream_code: 'TEMPORARY_FAILURE'
+      }
+    })
+    push('error_shown', step, {
+      error_code: 'TEMPORARY_FAILURE',
+      meta: { detail: 'Falha temporária no serviço. Tente novamente em instantes.' }
+    })
+    push('step_viewed', 'error')
+  } else if (errorKind === 'plain') {
+    push('error_shown', REVERSE_STEPS[lastIndex], { error_code: pick(Object.keys(ERROR_LABELS)) })
+  }
   if (end === 'abandoned') {
     tick(60, 1800)
     push('abandoned', null)
@@ -254,7 +315,7 @@ function finalizeSession(row, now) {
   if (send.flow === 'tracking') status = 'completed'
   else if (has('completed') || has('add_to_cart_clicked')) status = 'completed'
   else if (has('handoff_requested')) status = 'handoff'
-  else if (last.event === 'error_shown') status = 'error'
+  else if (last.event === 'error_shown' || last.step === 'error') status = 'error'
   else if (last.event === 'abandoned' || now - new Date(last.ts).getTime() > 30 * 60000) status = 'abandoned'
   else status = 'in_progress'
   row.session.status = status
