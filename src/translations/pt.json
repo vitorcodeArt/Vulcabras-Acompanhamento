@@ -189,7 +189,9 @@
     "error": "Erro",
     "no_click": "Botão enviado em {{date}}, sem abertura registrada.",
     "send_failed": "O botão não foi enviado: falha no envio em {{date}}.",
-    "other_details": "Outros detalhes"
+    "other_details": "Outros detalhes",
+    "order": "Pedido",
+    "products": "Produtos"
   },
   "requestTypes": {
     "troca": "Troca",

@@ -542,7 +542,23 @@ function sendDetail(sendId) {
   const row = rows().find((r) => r.send.send_id === sendId)
   if (!row) throw fail(404, 'NOT_FOUND', 'Envio não encontrado.')
   return {
-    data: { ...toItem(row), events: row.events.map(toEvent) },
+    data: {
+      ...toItem(row),
+      ...(row.send.flow === 'reverse' && row.session
+        ? {
+            order_number: row.order,
+            items: [
+              {
+                title: 'Tênis de Treino Demo Preto',
+                sku: `${row.order.slice(-6)}-001-37`,
+                size: '37',
+                image_url: null
+              }
+            ]
+          }
+        : {}),
+      events: row.events.map(toEvent)
+    },
     meta: meta(dateKey(row.send.sent_at), dateKey(row.send.sent_at))
   }
 }

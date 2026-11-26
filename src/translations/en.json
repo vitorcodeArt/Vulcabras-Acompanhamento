@@ -189,7 +189,9 @@
     "error": "Error",
     "no_click": "Button sent on {{date}}, no opening recorded.",
     "send_failed": "The button was not sent: send failed on {{date}}.",
-    "other_details": "Other details"
+    "other_details": "Other details",
+    "order": "Order",
+    "products": "Products"
   },
   "requestTypes": {
     "troca": "Exchange",

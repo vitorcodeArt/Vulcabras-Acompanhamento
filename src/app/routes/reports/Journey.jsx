@@ -267,6 +267,55 @@ function EventDetails({ event, helpers }) {
   )
 }
 
+const Items = styled.ul`
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+`
+
+const ItemRow = styled.li`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  img,
+  .placeholder {
+    width: 56px;
+    height: 56px;
+    flex: none;
+    border-radius: ${(p) => p.theme.brand.radiusSm};
+    border: 1px solid ${(p) => p.theme.brand.line};
+    object-fit: cover;
+    background: ${(p) => p.theme.brand.blue50};
+  }
+  strong {
+    display: block;
+  }
+  span {
+    font-size: 13px;
+    color: ${(p) => p.theme.brand.muted};
+  }
+`
+
+/** Produto escolhido pelo cliente; a imagem só aparece se o backend enviar `image_url` https. */
+function ItemLine({ item }) {
+  const safeImage = typeof item.image_url === 'string' && item.image_url.startsWith('https://')
+  return (
+    <ItemRow>
+      {safeImage ? (
+        <img src={item.image_url} alt="" loading="lazy" referrerPolicy="no-referrer" />
+      ) : (
+        <div className="placeholder" aria-hidden="true" />
+      )}
+      <div>
+        <strong>{item.title}</strong>
+        <span>{[item.sku, item.size && `Tam. ${item.size}`].filter(Boolean).join(' · ')}</span>
+      </div>
+    </ItemRow>
+  )
+}
+
 function Fact({ term, children }) {
   return (
     <div>
@@ -319,10 +368,23 @@ export default function Journey({ sendId, onBack }) {
               <Fact term={t('sends.columns.last_step')}>{lastStepText(item, label)}</Fact>
               <Fact term={t('sends.columns.result')}>{resultText(item, t)}</Fact>
               {item.reason && <Fact term={t('journey.reason')}>{item.reason}</Fact>}
+              {item.order_number && (
+                <Fact term={t('journey.order')}>
+                  <span>{item.order_number}</span>
+                  <CopyButton text={item.order_number} label={t('sends.copy', { id: item.order_number })} />
+                </Fact>
+              )}
               <Fact term={t('sends.columns.ticket')}>
                 <TicketLink id={item.ticket_id} />
               </Fact>
             </Facts>
+            {item.items?.length > 0 && (
+              <Items aria-label={t('journey.products')}>
+                {item.items.map((it, i) => (
+                  <ItemLine key={`${it.sku ?? i}`} item={it} />
+                ))}
+              </Items>
+            )}
           </Card>
 
           {findings.length > 0 && (
