@@ -243,10 +243,10 @@ describe('Diagnóstico do erro na jornada', () => {
   })
 
   // Varre os 30 dias que o mock gera, procurando um envio com erro que satisfaça o predicado
-  const findSend = async (predicate) => {
+  const findSend = async (predicate, status = 'error') => {
     const { mockTransport } = await import('../src/api/mock')
     const { addDays, today } = await import('../src/lib/dates')
-    const range = { from: addDays(today(), -30), to: today(), status: 'error', limit: 100 }
+    const range = { from: addDays(today(), -30), to: today(), status, limit: 100 }
     let cursor
     do {
       const { data } = await mockTransport({ path: '/sends', params: { ...range, cursor } })
@@ -259,28 +259,30 @@ describe('Diagnóstico do erro na jornada', () => {
     return null
   }
 
-  it('pedido não elegível: explica o motivo em português e mostra o código bruto', async () => {
-    const id = await findSend((events) => events.some((e) => e.meta?.eligible === false))
+  it('recusa por regra de negócio: aparece como "Não elegível", com título, orientação e detalhes recolhidos', async () => {
+    const id = await findSend(
+      (events) => events.some((e) => e.meta?.ineligibility_code?.startsWith('alreadyHaveActive')),
+      'not_eligible'
+    )
     expect(id).not.toBeNull()
     window.location.hash = `#/envios/${id}`
     renderApp()
-    expect(await screen.findByText('Diagnóstico do erro', {}, { timeout: 5000 })).toBeDefined()
-    expect(screen.getByText('Pedido não elegível para troca ou devolução')).toBeDefined()
-    expect(
-      screen.getByText('Já existe uma solicitação de troca ativa para o pedido; Orientar o cliente a procurar o SAC')
-    ).toBeDefined()
-    expect(screen.getAllByText(/alreadyHaveActiveExchangeRequest contactSAC/).length).toBeGreaterThan(0)
-    expect(screen.getAllByText('Terminou com erro').length).toBeGreaterThan(0) // status corrigido: não é "Abandonou"
-    expect(screen.getAllByText('Tela de erro').length).toBeGreaterThanOrEqual(2) // última etapa e linha do tempo
+    expect(await screen.findByText('O que aconteceu', {}, { timeout: 5000 })).toBeDefined()
+    expect(screen.getByRole('heading', { name: 'Já tem solicitação em andamento' })).toBeDefined()
+    expect(screen.getByText(/Não é um erro/)).toBeDefined()
+    expect(screen.getByText('Não elegível')).toBeDefined()
+    expect(screen.queryByText('Terminou com erro')).toBeNull()
+    expect(screen.getAllByText('Detalhes técnicos').length).toBeGreaterThan(0)
+    document.querySelectorAll('details').forEach((d) => expect(d.open).toBe(false))
   })
 
-  it('falha de integração: mostra a ferramenta, o status HTTP e a tentativa', async () => {
+  it('falha de integração: diz o que fazer e guarda ferramenta e status HTTP nos detalhes', async () => {
     const id = await findSend((events) => events.some((e) => e.event === 'api_call' && e.meta?.ok === false))
     expect(id).not.toBeNull()
     window.location.hash = `#/envios/${id}`
     renderApp()
-    expect(await screen.findByText('Falha na integração: create_reverse_order', {}, { timeout: 5000 })).toBeDefined()
-    expect(screen.getAllByText('Falha temporária no Troque').length).toBeGreaterThan(0)
+    expect(await screen.findByRole('heading', { name: 'Falha no Troque' }, { timeout: 5000 })).toBeDefined()
+    expect(screen.getByText(/acione a TI/)).toBeDefined()
     expect(screen.getAllByText('503').length).toBeGreaterThan(0)
   })
 
@@ -291,5 +293,57 @@ describe('Diagnóstico do erro na jornada', () => {
     renderApp()
     await screen.findByText('Linha do tempo', {}, { timeout: 5000 })
     expect(screen.queryByText('Diagnóstico do erro')).toBeNull()
+  })
+})
+
+describe('Número do pedido na jornada', () => {
+  beforeEach(() => {
+    cleanup()
+    vi.clearAllMocks()
+    window.history.pushState({}, '', '/')
+    vi.stubGlobal('ZAFClient', { init: vi.fn().mockReturnValue(mockClient) })
+  })
+
+  const findDetail = async (predicate, extra = {}) => {
+    const { mockTransport } = await import('../src/api/mock')
+    const { addDays, today } = await import('../src/lib/dates')
+    const range = {
+      from: addDays(today(), -30),
+      to: today(),
+      flow: 'reverse',
+      click_status: 'clicked',
+      limit: 100,
+      ...extra
+    }
+    let cursor
+    do {
+      const { data } = await mockTransport({ path: '/sends', params: { ...range, cursor } })
+      for (const item of data.items) {
+        const detail = (await mockTransport({ path: `/sends/${item.send_id}` })).data
+        if (predicate(detail)) return detail
+      }
+      cursor = data.next_cursor
+    } while (cursor)
+    return null
+  }
+
+  it('pedido não localizado: mostra o número digitado como não confirmado e orienta o atendente', async () => {
+    const detail = await findDetail((d) => d.order_verified === false, { status: 'error' })
+    expect(detail).not.toBeNull()
+    window.location.hash = `#/envios/${detail.send_id}`
+    renderApp()
+    expect(await screen.findByText('Pedido informado', {}, { timeout: 5000 })).toBeDefined()
+    expect(screen.getAllByText(detail.order_number).length).toBeGreaterThan(0)
+    expect(screen.getByText('Não confirmado')).toBeDefined()
+    expect(screen.getByText(/o Troque não confirmou/)).toBeDefined()
+    expect(screen.getByRole('heading', { name: 'Pedido não encontrado' })).toBeDefined()
+  })
+
+  it('pedido confirmado não mostra o aviso', async () => {
+    const detail = await findDetail((d) => d.order_verified === true)
+    window.location.hash = `#/envios/${detail.send_id}`
+    renderApp()
+    expect((await screen.findAllByText(detail.order_number, {}, { timeout: 5000 })).length).toBeGreaterThan(0)
+    expect(screen.queryByText('Não confirmado')).toBeNull()
   })
 })

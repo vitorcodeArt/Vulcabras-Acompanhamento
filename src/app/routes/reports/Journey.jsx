@@ -12,7 +12,8 @@ import LoadingState from '../../components/LoadingState'
 import { ClickChip, SituationChip } from '../../components/StatusChip'
 import TicketLink from '../../components/TicketLink'
 import { lastStepText, resultText } from './sendFields'
-import { diagnose, metaDetails } from './diagnosis'
+import { INELIGIBLE_ERROR_CODES, diagnose, metaDetails } from './diagnosis'
+import VtexOrder from './VtexOrder'
 
 const Stack = styled.div`
   display: grid;
@@ -134,6 +135,17 @@ const Sub = styled.span`
   color: ${(p) => p.theme.brand.muted};
 `
 
+const Unverified = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: #fff1d6;
+  color: #7a4600;
+`
+
 const ErrorBox = styled.span`
   display: inline-flex;
   align-items: center;
@@ -144,19 +156,23 @@ const ErrorBox = styled.span`
   font-size: 13px;
   font-weight: 600;
   ${(p) => css`
-    background: #fde8e6;
-    color: ${p.theme.brand.danger};
+    background: ${p.$refusal ? p.theme.brand.blue100 : '#fde8e6'};
+    color: ${p.$refusal ? p.theme.brand.blue900 : p.theme.brand.danger};
   `}
 `
 
+// [fundo, texto, borda]: o ícone e o título dizem o mesmo que a cor
 const TONES = {
-  danger: ['#FDE8E6', '#8C1D18', '#B3261E'],
-  warning: ['#FFF1D6', '#7A4600', '#B26A00']
+  info: ['#E3EDFD', '#0F3B8C', '#1556C0'],
+  warning: ['#FFF1D6', '#7A4600', '#B26A00'],
+  danger: ['#FDE8E6', '#8C1D18', '#B3261E']
 }
 
 const Finding = styled.li`
   list-style: none;
   padding: 14px 16px;
+  display: grid;
+  gap: 8px;
   border-radius: ${(p) => p.theme.brand.radiusSm};
   ${(p) => css`
     background: ${TONES[p.$tone][0]};
@@ -165,12 +181,19 @@ const Finding = styled.li`
   `}
 `
 
-const FindingTitle = styled.p`
+const FindingTitle = styled.h3`
   margin: 0;
   display: flex;
   align-items: center;
   gap: 8px;
+  font-size: 16px;
   font-weight: 700;
+`
+
+const FindingText = styled.p`
+  margin: 0;
+  font-size: 14px;
+  overflow-wrap: anywhere;
 `
 
 const FindingLines = styled.dl`
@@ -178,7 +201,7 @@ const FindingLines = styled.dl`
   display: grid;
   grid-template-columns: max-content 1fr;
   gap: 4px 16px;
-  font-size: 14px;
+  font-size: 13px;
   dt {
     opacity: 0.85;
   }
@@ -186,6 +209,18 @@ const FindingLines = styled.dl`
     margin: 0;
     font-weight: 600;
     overflow-wrap: anywhere;
+  }
+`
+
+const Technical = styled.details`
+  font-size: 13px;
+  summary {
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  summary:focus-visible {
+    outline: 3px solid ${(p) => p.theme.brand.blue500};
+    outline-offset: 2px;
   }
 `
 
@@ -236,34 +271,22 @@ const More = styled.details`
   }
 `
 
-/** Detalhes do `meta` de um evento, com rótulo em português e dados sensíveis mascarados. */
+/** Detalhes do `meta` de um evento, recolhidos: rótulo em português e dados sensíveis mascarados. */
 function EventDetails({ event, helpers }) {
   const { rows, other } = metaDetails(event.meta, helpers)
-  if (!rows.length && !other.length) return null
+  const all = [...rows, ...other]
+  if (!all.length) return null
   return (
-    <>
-      {rows.length > 0 && (
-        <DetailChips>
-          {rows.map((row) => (
-            <Chip key={row.id}>
-              {row.label}: <strong>{row.value}</strong>
-            </Chip>
-          ))}
-        </DetailChips>
-      )}
-      {other.length > 0 && (
-        <More>
-          <summary>{helpers.t('journey.other_details')}</summary>
-          <DetailChips>
-            {other.map((row) => (
-              <Chip key={row.id}>
-                {row.label}: <strong>{row.value}</strong>
-              </Chip>
-            ))}
-          </DetailChips>
-        </More>
-      )}
-    </>
+    <More>
+      <summary>{helpers.t('diag.technical')}</summary>
+      <DetailChips>
+        {all.map((row) => (
+          <Chip key={row.id}>
+            {row.label}: <strong>{row.value}</strong>
+          </Chip>
+        ))}
+      </DetailChips>
+    </More>
   )
 }
 
@@ -369,23 +392,35 @@ export default function Journey({ sendId, onBack }) {
               <Fact term={t('sends.columns.result')}>{resultText(item, t)}</Fact>
               {item.reason && <Fact term={t('journey.reason')}>{item.reason}</Fact>}
               {item.order_number && (
-                <Fact term={t('journey.order')}>
+                <Fact term={item.order_verified === false ? t('journey.order_typed') : t('journey.order')}>
                   <span>{item.order_number}</span>
-                  <CopyButton text={item.order_number} label={t('sends.copy', { id: item.order_number })} />
+                  <CopyButton text={item.order_number} label={t('journey.copy_order', { id: item.order_number })} />
+                  {item.order_verified === false && (
+                    <Unverified>
+                      <Icon name="alert" size={14} />
+                      {t('journey.order_unverified')}
+                    </Unverified>
+                  )}
                 </Fact>
               )}
               <Fact term={t('sends.columns.ticket')}>
                 <TicketLink id={item.ticket_id} />
               </Fact>
             </Facts>
+            {item.order_number && item.order_verified === false && <Hint>{t('journey.order_unverified_hint')}</Hint>}
             {item.items?.length > 0 && (
-              <Items aria-label={t('journey.products')}>
-                {item.items.map((it, i) => (
-                  <ItemLine key={`${it.sku ?? i}`} item={it} />
-                ))}
-              </Items>
+              <>
+                <Hint>{t('journey.chosen_products')}</Hint>
+                <Items aria-label={t('journey.products')}>
+                  {item.items.map((it, i) => (
+                    <ItemLine key={`${it.sku ?? i}`} item={it} />
+                  ))}
+                </Items>
+              </>
             )}
           </Card>
+
+          {item.flow === 'reverse' && item.order_number && <VtexOrder sendId={item.send_id} />}
 
           {findings.length > 0 && (
             <Card>
@@ -395,18 +430,29 @@ export default function Journey({ sendId, onBack }) {
                 {findings.map((finding) => (
                   <Finding key={finding.id} $tone={finding.tone}>
                     <FindingTitle>
-                      <Icon name="alert" size={18} />
+                      <Icon name={finding.tone === 'info' ? 'info' : 'alert'} size={18} />
                       {finding.title}
                     </FindingTitle>
-                    {finding.lines.length > 0 && (
-                      <FindingLines>
-                        {finding.lines.map((l) => (
-                          <div key={l.id} style={{ display: 'contents' }}>
-                            <dt>{l.label}</dt>
-                            <dd>{l.value}</dd>
-                          </div>
-                        ))}
-                      </FindingLines>
+                    {finding.message && (
+                      <FindingText>
+                        <strong>{t('diag.message')}:</strong> {finding.message}
+                      </FindingText>
+                    )}
+                    <FindingText>
+                      <strong>{t('diag.guidance')}:</strong> {finding.guidance}
+                    </FindingText>
+                    {finding.technical.length > 0 && (
+                      <Technical>
+                        <summary>{t('diag.technical')}</summary>
+                        <FindingLines>
+                          {finding.technical.map((l) => (
+                            <div key={l.id} style={{ display: 'contents' }}>
+                              <dt>{l.label}</dt>
+                              <dd>{l.value}</dd>
+                            </div>
+                          ))}
+                        </FindingLines>
+                      </Technical>
                     )}
                   </Finding>
                 ))}
@@ -418,33 +464,39 @@ export default function Journey({ sendId, onBack }) {
             <CardTitle id="timeline-title">{t('journey.timeline')}</CardTitle>
             {item.events?.length ? (
               <Timeline aria-label={t('journey.timeline')}>
-                {item.events.map((event) => (
-                  <Event key={event.id}>
-                    <Time dateTime={event.ts}>{formatTime(event.ts)}</Time>
-                    <Dot $error={Boolean(event.error_code)} aria-hidden="true" />
-                    <Content>
-                      {event.step_label && <Step>{event.step_label}</Step>}
-                      <What>{event.event_label}</What>
-                      {event.duration_ms != null && (
-                        <Sub>
-                          {t('journey.time_in_step')}: {formatDuration(event.duration_ms / 1000)}
-                        </Sub>
-                      )}
-                      {event.meta?.reason && (
-                        <Sub>
-                          {t('journey.reason')}: {event.meta.reason}
-                        </Sub>
-                      )}
-                      <EventDetails event={event} helpers={helpers} />
-                      {event.error_code && (
-                        <ErrorBox>
-                          <Icon name="alert" size={14} />
-                          {t('journey.error')}: {event.error_label ?? event.error_code}
-                        </ErrorBox>
-                      )}
-                    </Content>
-                  </Event>
-                ))}
+                {item.events.map((event) => {
+                  // Recusa por regra de negócio é um aviso, não um erro
+                  const refusal =
+                    event.event === 'error_shown' &&
+                    (INELIGIBLE_ERROR_CODES.includes(event.error_code) || item.session_status === 'not_eligible')
+                  return (
+                    <Event key={event.id}>
+                      <Time dateTime={event.ts}>{formatTime(event.ts)}</Time>
+                      <Dot $error={Boolean(event.error_code) && !refusal} aria-hidden="true" />
+                      <Content>
+                        {event.step_label && <Step>{event.step_label}</Step>}
+                        <What>{event.event_label}</What>
+                        {event.duration_ms != null && (
+                          <Sub>
+                            {t('journey.time_in_step')}: {formatDuration(event.duration_ms / 1000)}
+                          </Sub>
+                        )}
+                        {event.meta?.reason && (
+                          <Sub>
+                            {t('journey.reason')}: {event.meta.reason}
+                          </Sub>
+                        )}
+                        {event.error_code && (
+                          <ErrorBox $refusal={refusal}>
+                            <Icon name={refusal ? 'info' : 'alert'} size={14} />
+                            {refusal ? t('diag.notice') : t('journey.error')}: {event.error_label ?? event.error_code}
+                          </ErrorBox>
+                        )}
+                        <EventDetails event={event} helpers={helpers} />
+                      </Content>
+                    </Event>
+                  )
+                })}
               </Timeline>
             ) : (
               <Notice role="status">

@@ -150,13 +150,29 @@ spec/                    testes (Vitest + Testing Library)
 
 Os rótulos (`label`) vêm da API. O app só traduz o que é fixo da interface. Por enquanto a API não manda rótulo para marca, fluxo, status do clique, situação e última etapa: o app usa os textos fixos de `pt.json`/`en.json` (conforme a seção 4 do contrato) e passa a usar `click_status_label`, `session_status_label` e `last_step_label` automaticamente se o backend os enviar.
 
-## Diagnóstico do erro na jornada
+## "O que aconteceu" na jornada
 
-Ao abrir um envio, a tela mostra um cartão **"Diagnóstico do erro"** quando a jornada teve erro, falha de integração ou pediu atendente: o tipo do erro, o retorno da integração (ferramenta, status HTTP, tentativas), o motivo de inelegibilidade do pedido e a mensagem que o cliente viu. Cada evento da linha do tempo também lista seus detalhes (`meta`) com rótulo em português.
+Ao abrir um envio, o cartão **"O que aconteceu"** explica a jornada para o atendente: um título em linguagem simples, a mensagem que o cliente viu, **o que fazer** e, recolhidos, os **detalhes técnicos** (código, ferramenta, status HTTP, tentativas).
 
-- Os textos de erro e de integração são **mascarados duas vezes** (no backend, antes de gravar, e no app, antes de exibir): e-mail, links, números longos (CPF, telefone, pedido) e códigos opacos viram `•••`. Nomes próprios não são reconhecidos, por isso só entram textos do sistema.
-- O cartão depende de campos que o backend passou a gravar (`error_shown.meta.detail`, `api_call.meta.upstream_code` e `ineligibility_code`). Jornadas **anteriores** a essa versão mostram só o que já estava gravado (por exemplo, o `ineligibility_code` do evento do servidor).
-- As palavras `alreadyHaveActiveExchangeRequest` e `contactSAC` têm tradução fixa nos arquivos de tradução. As demais aparecem como o Troque as envia.
+| Cor | Casos |
+|---|---|
+| Azul (informação) | já tem solicitação em andamento, compra em marketplace, cliente enviado ao atendente |
+| Amarelo (atenção) | situação do pedido não permite troca, prazo encerrado, sem opção de troca, pedido não encontrado, sessão expirada |
+| Vermelho (falha) | falha no Troque, criação não confirmada, erro de tela |
+
+**Recusa por regra de negócio não é erro:** a sessão fica com a situação **"Não elegível"**, fora dos totais de erro, e aparece em "Recusas por motivo". Isso depende do backend com a migração `004`.
+
+As orientações ficam em `diag.cases` nos arquivos de tradução ([pt.json](src/translations/pt.json)). O significado de `orderUnauthorizedSituation` ainda não foi confirmado com o Troque.
+
+Os textos de erro e de integração são **mascarados duas vezes** (no backend, antes de gravar, e no app, antes de exibir): e-mail, links, números longos e códigos opacos viram `•••`. Nomes próprios não são reconhecidos, por isso só entram textos do sistema.
+
+## Pedido na VTEX
+
+Na jornada de uma troca/devolução com número de pedido, o cartão **"Pedido na VTEX"** mostra status, datas, produtos com imagem, valores, entrega com rastreio e forma de pagamento. O app chama só `/sends/:sendId/order`; **a consulta à VTEX é feita pelo backend**, com as chaves da marca, e devolve uma lista fechada de campos (sem documento, nome, contato, endereço, cartão ou nota fiscal). Nada é gravado.
+
+No backend, as chaves `VTEX_<MARCA>_API_KEY` / `_API_TOKEN` precisam de permissão de leitura de pedidos. A Mizuno consulta `mizunobrio` por padrão (`VTEX_MIZUNO_OMS_URL`); as outras marcas usam a própria `STORE_URL`.
+
+Se o número foi só digitado pelo cliente (não confirmado pelo Troque), o cartão avisa que o pedido pode não ser dele.
 
 ## Segurança
 

@@ -79,7 +79,12 @@ export default function ReverseReport({ params }) {
               details={[{ label: r('p90'), value: formatDuration(d.totals.p90_seconds_to_complete) }]}
             />
             <KpiCard icon="headset" label={r('handoff')} value={formatNumber(d.totals.handoff)} />
-            <KpiCard icon="alert" label={r('errors')} value={formatNumber(d.totals.errors)} />
+            <KpiCard
+              icon="alert"
+              label={r('errors')}
+              value={formatNumber(d.totals.errors)}
+              details={[{ label: r('not_eligible'), value: formatNumber(d.totals.not_eligible) }]}
+            />
           </KpiRow>
 
           <CardGrid>
@@ -110,6 +115,12 @@ export default function ReverseReport({ params }) {
               </Facts>
             </Card>
 
+            <BarList
+              title={r('not_eligible_by_reason')}
+              hint={r('not_eligible_hint')}
+              items={toItems(d.not_eligible_by_reason, t, (row) => row.label ?? row.key)}
+              emptyText={r('no_refusals')}
+            />
             <BarList
               title={r('handoff_by_reason')}
               items={toItems(d.handoff_by_reason, t, (row) => row.key)}

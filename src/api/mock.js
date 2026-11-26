@@ -34,7 +34,7 @@ const STEP_LABELS = {
   products: 'Produtos',
   details: 'Detalhe do produto',
   submit: 'Envio da solicitação',
-  error: 'Tela de erro'
+  error: 'Tela final'
 }
 const EVENT_LABELS = {
   webview_opened: 'Abriu a webview',
@@ -73,6 +73,25 @@ const OUTCOME_LABELS = {
   pending_analysis: 'Em análise',
   approved_shipping_failed: 'Aprovada, envio falhou'
 }
+const REFUSALS = [
+  {
+    code: 'alreadyHaveActiveExchangeRequest contactSAC',
+    message: 'Este pedido já possui uma solicitação de troca ativa. Fale com o SAC.',
+    existing: 1
+  },
+  {
+    code: 'Favor utilizar a central de trocas do Marketplace.',
+    message: 'Favor utilizar a central de trocas do Marketplace.',
+    existing: 0
+  },
+  { code: 'orderUnauthorizedSituation', message: 'Este pedido ainda não pode ser trocado.', existing: 0 }
+]
+let refusalCount = 0
+const REFUSAL_LABELS = [
+  ['active_request', /alreadyHaveActive/i, 'Já tem solicitação em andamento'],
+  ['marketplace', /marketplace/i, 'Compra feita em marketplace'],
+  ['order_situation', /orderUnauthorized/i, 'Situação do pedido não permite troca']
+]
 const HANDOFF_REASONS = [
   'Solicitação fora do prazo',
   'Produto com defeito grave',
@@ -210,13 +229,17 @@ function genEvents(row, { rand, pick, between, now, sentAt }) {
   push('webview_opened', 'start')
   const roll = rand()
   const end =
-    roll < 0.3 ? 'completed' : roll < 0.45 ? 'handoff' : roll < 0.6 ? 'error' : fresh ? 'in_progress' : 'abandoned'
+    roll < 0.3 ? 'completed' : roll < 0.43 ? 'handoff' : roll < 0.7 ? 'error' : fresh ? 'in_progress' : 'abandoned'
   // Erros: pedido não elegível (termina na identificação), falha da integração ou erro simples
-  const errorKind = end === 'error' ? pick(['ineligible', 'integration', 'plain']) : null
+  const errorKind =
+    end === 'error' ? pick(['ineligible', 'ineligible', 'ineligible', 'integration', 'not_found', 'plain']) : null
+  // Variantes de recusa que o Troque devolve (ora código, ora frase)
+  // em rodízio, para a demonstração sempre ter os três motivos
+  const refusal = errorKind === 'ineligible' ? REFUSALS[refusalCount++ % REFUSALS.length] : null
   const lastIndex =
     end === 'completed'
       ? REVERSE_STEPS.length - 1
-      : errorKind === 'ineligible'
+      : errorKind === 'ineligible' || errorKind === 'not_found'
         ? 1
         : between(1, REVERSE_STEPS.length - 2)
   let retentionOffered = false
@@ -226,11 +249,12 @@ function genEvents(row, { rand, pick, between, now, sentAt }) {
     push('step_viewed', step)
     if (step === 'identify') {
       const ineligible = errorKind === 'ineligible'
-      push('api_call', step, {
-        source: 'server',
-        duration_ms: between(1500, 3500),
-        meta: { service: 'troque', tool: 'prepare_reverse_order', ok: true, attempt: 1, http_status: null }
-      })
+      if (errorKind !== 'not_found')
+        push('api_call', step, {
+          source: 'server',
+          duration_ms: between(1500, 3500),
+          meta: { service: 'troque', tool: 'prepare_reverse_order', ok: true, attempt: 1, http_status: null }
+        })
       if (ineligible) {
         push('step_completed', step, {
           source: 'server',
@@ -239,8 +263,8 @@ function genEvents(row, { rand, pick, between, now, sentAt }) {
             reasons: 0,
             eligible: false,
             order_hash: `demo${between(100000, 999999)}abcdef0123456789`,
-            existing_reverses: 1,
-            ineligibility_code: 'alreadyHaveActiveExchangeRequest contactSAC'
+            existing_reverses: refusal.existing,
+            ineligibility_code: refusal.code
           }
         })
       }
@@ -260,8 +284,8 @@ function genEvents(row, { rand, pick, between, now, sentAt }) {
     push('error_shown', 'identify', {
       error_code: 'ORDER_NOT_ELIGIBLE',
       meta: {
-        ineligibility_code: 'alreadyHaveActiveExchangeRequest contactSAC',
-        detail: 'Este pedido já possui uma solicitação de troca ativa. Fale com o SAC.'
+        ineligibility_code: refusal.code,
+        detail: refusal.message
       }
     })
     push('step_completed', 'identify', { duration_ms: between(20, 60) * 1000 })
@@ -286,8 +310,25 @@ function genEvents(row, { rand, pick, between, now, sentAt }) {
       meta: { detail: 'Falha temporária no serviço. Tente novamente em instantes.' }
     })
     push('step_viewed', 'error')
+  } else if (errorKind === 'not_found') {
+    push('api_call', 'identify', {
+      source: 'server',
+      duration_ms: between(1500, 3500),
+      error_code: 'ORDER_NOT_FOUND',
+      meta: {
+        service: 'troque',
+        tool: 'prepare_reverse_order',
+        ok: false,
+        attempt: 1,
+        upstream_code: 'ORDER_NOT_FOUND'
+      }
+    })
+    push('error_shown', 'identify', { error_code: 'ORDER_NOT_FOUND', meta: { attempt: 1 } })
   } else if (errorKind === 'plain') {
-    push('error_shown', REVERSE_STEPS[lastIndex], { error_code: pick(Object.keys(ERROR_LABELS)) })
+    const failures = Object.keys(ERROR_LABELS).filter(
+      (code) => !['ORDER_NOT_ELIGIBLE', 'ORDER_NOT_FOUND'].includes(code)
+    )
+    push('error_shown', REVERSE_STEPS[lastIndex], { error_code: pick(failures) })
   }
   if (end === 'abandoned') {
     tick(60, 1800)
@@ -315,6 +356,7 @@ function finalizeSession(row, now) {
   if (send.flow === 'tracking') status = 'completed'
   else if (has('completed') || has('add_to_cart_clicked')) status = 'completed'
   else if (has('handoff_requested')) status = 'handoff'
+  else if (events.some((e) => e.meta?.eligible === false)) status = 'not_eligible'
   else if (last.event === 'error_shown' || last.step === 'error') status = 'error'
   else if (last.event === 'abandoned' || now - new Date(last.ts).getTime() > 30 * 60000) status = 'abandoned'
   else status = 'in_progress'
@@ -371,7 +413,8 @@ function toEvent(e) {
     step: e.step,
     step_label: e.step ? (STEP_LABELS[e.step] ?? e.step) : null,
     event: e.event,
-    event_label: EVENT_LABELS[e.event] ?? e.event,
+    event_label:
+      e.error_code === 'ORDER_NOT_ELIGIBLE' ? 'Viu o aviso de pedido não elegível' : (EVENT_LABELS[e.event] ?? e.event),
     duration_ms: e.duration_ms,
     error_code: e.error_code,
     error_label: e.error_code ? (ERROR_LABELS[e.error_code] ?? e.error_code) : null,
@@ -429,6 +472,9 @@ const tally = (list, fn) => {
 }
 const hasEvent = (row, name) => row.events.some((e) => e.event === name)
 
+// "Erro" não inclui recusa por regra de negócio
+const isFailure = (r) => hasEvent(r, 'error_shown') && r.session?.status !== 'not_eligible'
+
 function totalsOf(list) {
   const sends = count(list)
   const failed = list.filter((r) => !r.send.ok).length
@@ -446,7 +492,8 @@ function totalsOf(list) {
     completion_rate_of_clicked: rate(completed, clicked),
     completion_rate_of_sent: rate(completed, okSends),
     handoff: list.filter((r) => r.session?.status === 'handoff').length,
-    errors: list.filter((r) => hasEvent(r, 'error_shown')).length,
+    errors: list.filter(isFailure).length,
+    not_eligible: list.filter((r) => r.session?.status === 'not_eligible').length,
     avg_duration_seconds: durations.length ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length) : null
   }
 }
@@ -538,6 +585,8 @@ function sendsList(params) {
   return { data: { items: page.map(toItem), next_cursor: next }, meta: meta(from, to) }
 }
 
+const isNotFound = (row) => row.events.some((e) => e.error_code === 'ORDER_NOT_FOUND' && e.event === 'api_call')
+
 function sendDetail(sendId) {
   const row = rows().find((r) => r.send.send_id === sendId)
   if (!row) throw fail(404, 'NOT_FOUND', 'Envio não encontrado.')
@@ -547,20 +596,79 @@ function sendDetail(sendId) {
       ...(row.send.flow === 'reverse' && row.session
         ? {
             order_number: row.order,
-            items: [
-              {
-                title: 'Tênis de Treino Demo Preto',
-                sku: `${row.order.slice(-6)}-001-37`,
-                size: '37',
-                image_url: null
-              }
-            ]
+            order_verified: !isNotFound(row),
+            items: isNotFound(row)
+              ? []
+              : [
+                  {
+                    title: 'Tênis de Treino Demo Preto',
+                    sku: `${row.order.slice(-6)}-001-37`,
+                    size: '37',
+                    image_url: null
+                  }
+                ]
           }
         : {}),
       events: row.events.map(toEvent)
     },
     meta: meta(dateKey(row.send.sent_at), dateKey(row.send.sent_at))
   }
+}
+
+// Pedido FICTÍCIO no formato de /sends/:sendId/order
+function sendOrder(sendId) {
+  const { data } = sendDetail(sendId)
+  const answer = (reason, order = null) => ({
+    data: {
+      order_number: data.order_number ?? null,
+      order_verified: data.order_number ? data.order_verified : null,
+      reason,
+      order
+    },
+    meta: meta(today(), today())
+  })
+  if (!data.order_number) return answer('no_order_number')
+  if (data.order_verified === false) return answer('not_found')
+  const created = new Date(new Date(data.sent_at).getTime() - 20 * 86400000)
+  const later = (days) => new Date(created.getTime() + days * 86400000).toISOString()
+  return answer(null, {
+    order_id: `${data.order_number}-01`,
+    status: 'invoiced',
+    status_label: 'Faturado',
+    created_at: created.toISOString(),
+    invoiced_at: later(1),
+    totals: { items_cents: 25998, discounts_cents: -5200, shipping_cents: 990, total_cents: 21788 },
+    items: [
+      {
+        name: 'Tênis de Treino Demo Preto',
+        variation: '37 Preto',
+        ref_id: `${data.order_number.slice(-6)}-001-37`,
+        quantity: 1,
+        price_cents: 15999,
+        list_price_cents: 19999,
+        image_url: null
+      },
+      {
+        name: 'Camiseta Demo Azul',
+        variation: 'M Azul',
+        ref_id: `${data.order_number.slice(-6)}-002-M`,
+        quantity: 1,
+        price_cents: 4799,
+        list_price_cents: 5999,
+        image_url: null
+      }
+    ],
+    shipping: { courier: 'Transportadora Demo', method: 'Normal', estimate_at: later(7) },
+    packages: [
+      {
+        courier: 'Transportadora Demo',
+        tracking_number: `DEMO${data.order_number}BR`,
+        tracking_url: null,
+        delivered_at: later(6)
+      }
+    ],
+    payments: [{ method: 'Cartão Demo', installments: 2 }]
+  })
 }
 
 function sessionDetail(sessionId) {
@@ -597,7 +705,8 @@ function reverseReport(params) {
         sessions: sessions.length,
         completed: done.length,
         handoff: sessions.filter((r) => r.session.status === 'handoff').length,
-        errors: sessions.filter((r) => hasEvent(r, 'error_shown')).length,
+        errors: sessions.filter(isFailure).length,
+        not_eligible: sessions.filter((r) => r.session.status === 'not_eligible').length,
         avg_seconds_to_complete: doneSeconds.length
           ? Math.round(doneSeconds.reduce((a, b) => a + b, 0) / doneSeconds.length)
           : null,
@@ -621,9 +730,16 @@ function reverseReport(params) {
       photos: { sessions_with_photos: sessions.filter((r) => hasEvent(r, 'photo_added')).length },
       handoff_by_reason: top(tally(sessions, (r) => metaOf(r, 'handoff_requested')?.reason)),
       errors_by_code: labeled(
-        tally(sessions, (r) => r.events.find((e) => e.event === 'error_shown')?.error_code),
+        tally(sessions.filter(isFailure), (r) => r.events.find((e) => e.event === 'error_shown')?.error_code),
         ERROR_LABELS
       ),
+      not_eligible_by_reason: top(
+        tally(sessions, (r) => {
+          if (r.session.status !== 'not_eligible') return null
+          const code = r.events.find((e) => e.meta?.eligible === false)?.meta.ineligibility_code
+          return REFUSAL_LABELS.find(([, pattern]) => pattern.test(code))?.[0] ?? 'not_eligible'
+        })
+      ).map((x) => ({ ...x, label: REFUSAL_LABELS.find(([key]) => key === x.key)?.[2] ?? 'Pedido não elegível' })),
       by_brand: BRANDS.map((key) => {
         const own = sessions.filter((r) => r.send.brand === key)
         return { key, sessions: own.length, completed: own.filter((r) => r.session.status === 'completed').length }
@@ -817,6 +933,8 @@ export async function mockTransport({ path, params = {} }) {
   else if (path === '/summary') result = summary(params)
   else if (path === '/funnel') result = funnel(params)
   else if (path === '/sends') result = sendsList(params)
+  else if (path.startsWith('/sends/') && path.endsWith('/order'))
+    result = sendOrder(decodeURIComponent(path.slice(7, -'/order'.length)))
   else if (path.startsWith('/sends/')) result = sendDetail(decodeURIComponent(path.slice(7)))
   else if (path.startsWith('/sessions/')) result = sessionDetail(decodeURIComponent(path.slice(10)))
   else if (path === '/reports/reverse') result = reverseReport(params)

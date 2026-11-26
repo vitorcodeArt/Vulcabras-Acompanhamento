@@ -34,6 +34,7 @@ const CLICK = {
 const STATUS = {
   completed: ['success', 'check'],
   handoff: ['blue', 'headset'],
+  not_eligible: ['blue', 'info'],
   error: ['danger', 'alert'],
   abandoned: ['neutral', 'x'],
   in_progress: ['warning', 'clock']

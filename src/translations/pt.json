@@ -92,7 +92,8 @@
       "completion_of_clicked": "Conclusão (sobre clicados)",
       "completion_of_sent": "Conclusão (sobre enviados)",
       "handoff": "Pediram atendente",
-      "errors": "Com erro"
+      "errors": "Com erro",
+      "not_eligible": "Não elegíveis"
     },
     "daily_hint": "Enviados, clicaram e concluídos em cada dia.",
     "breakdown_hint": "Enviados no período e taxas."
@@ -128,7 +129,8 @@
     "handoff": "Pediu atendente",
     "error": "Terminou com erro",
     "abandoned": "Abandonou",
-    "in_progress": "Em andamento"
+    "in_progress": "Em andamento",
+    "not_eligible": "Não elegível"
   },
   "steps": {
     "start": "Início",
@@ -145,7 +147,7 @@
     "products": "Produtos",
     "details": "Detalhe do produto",
     "submit": "Envio da solicitação",
-    "error": "Tela de erro"
+    "error": "Tela final"
   },
   "sends": {
     "title": "Envios",
@@ -191,7 +193,12 @@
     "send_failed": "O botão não foi enviado: falha no envio em {{date}}.",
     "other_details": "Outros detalhes",
     "order": "Pedido",
-    "products": "Produtos"
+    "products": "Produtos",
+    "order_typed": "Pedido informado",
+    "order_unverified": "Não confirmado",
+    "order_unverified_hint": "Número digitado pelo cliente que o Troque não confirmou. Confira com o cliente.",
+    "copy_order": "Copiar número do pedido {{id}}",
+    "chosen_products": "Produtos escolhidos pelo cliente"
   },
   "requestTypes": {
     "troca": "Troca",
@@ -217,7 +224,11 @@
     "no_handoff": "Nenhum pedido de atendente.",
     "errors_by_code": "Erros por tipo",
     "no_errors": "Nenhum erro no período.",
-    "unknown_error": "Sem código registrado"
+    "unknown_error": "Sem código registrado",
+    "not_eligible": "Não elegíveis",
+    "not_eligible_by_reason": "Recusas por motivo",
+    "not_eligible_hint": "Regras de negócio; não contam como erro.",
+    "no_refusals": "Nenhuma recusa no período."
   },
   "catalog": {
     "empty": "Nenhuma sessão no período.",
@@ -245,19 +256,70 @@
     "flow_hint": "Exporta o período e a marca escolhidos."
   },
   "diag": {
-    "title": "Diagnóstico do erro",
-    "hint": "O que o sistema registrou. Dados pessoais aparecem mascarados.",
-    "integration_failed": "Falha na integração: {{tool}}",
-    "service": "serviço",
-    "ineligible": "Pedido não elegível para troca ou devolução",
-    "error_shown": "Erro exibido ao cliente",
-    "handoff": "Cliente enviado ao atendente",
-    "unknown": "A jornada terminou com erro, mas nenhum detalhe foi registrado.",
+    "title": "O que aconteceu",
+    "hint": "Resumo para o atendimento. Dados pessoais aparecem mascarados.",
     "error_type": "Tipo de erro",
     "upstream": "Retorno da integração",
     "reason": "Motivo",
     "step": "Etapa",
-    "shown_to_customer": "Mensagem mostrada ao cliente"
+    "message": "Mensagem",
+    "guidance": "O que fazer",
+    "technical": "Detalhes técnicos",
+    "notice": "Aviso",
+    "cases": {
+      "active_request": {
+        "title": "Já tem solicitação em andamento",
+        "guidance": "Não é um erro. Acompanhe a solicitação existente ou acione o SAC."
+      },
+      "marketplace": {
+        "title": "Compra feita em marketplace",
+        "guidance": "Oriente o cliente a usar a central de trocas do marketplace onde comprou."
+      },
+      "order_situation": {
+        "title": "Situação do pedido não permite troca",
+        "guidance": "Confira o status do pedido antes de orientar o cliente."
+      },
+      "deadline": {
+        "title": "Prazo de troca encerrado",
+        "guidance": "Informe o prazo ao cliente."
+      },
+      "no_reasons": {
+        "title": "Sem opção de troca ou devolução",
+        "guidance": "Verifique se o outro tipo (troca ou devolução) está disponível."
+      },
+      "not_eligible": {
+        "title": "Pedido não elegível",
+        "guidance": "Confira a mensagem do Troque antes de orientar o cliente."
+      },
+      "order_not_found": {
+        "title": "Pedido não encontrado",
+        "guidance": "Confira com o cliente o número do pedido e o CPF ou e-mail informado."
+      },
+      "session_expired": {
+        "title": "Sessão expirada",
+        "guidance": "Envie um novo botão para o cliente."
+      },
+      "creation_unconfirmed": {
+        "title": "Criação não confirmada",
+        "guidance": "Confira se a solicitação foi criada antes de pedir nova tentativa."
+      },
+      "integration": {
+        "title": "Falha no Troque",
+        "guidance": "Peça uma nova tentativa. Se repetir, acione a TI."
+      },
+      "screen_error": {
+        "title": "Erro exibido ao cliente",
+        "guidance": "Peça uma nova tentativa. Se repetir, acione a TI."
+      },
+      "handoff": {
+        "title": "Cliente enviado ao atendente",
+        "guidance": "Continue o atendimento na conversa."
+      },
+      "unknown": {
+        "title": "Terminou com erro sem detalhe",
+        "guidance": "Peça uma nova tentativa. Se repetir, acione a TI."
+      }
+    }
   },
   "meta": {
     "eligible": "Elegível",
@@ -295,7 +357,8 @@
   },
   "ineligibility": {
     "alreadyHaveActiveExchangeRequest": "Já existe uma solicitação de troca ativa para o pedido",
-    "contactSAC": "Orientar o cliente a procurar o SAC"
+    "contactSAC": "Orientar o cliente a procurar o SAC",
+    "orderUnauthorizedSituation": "A situação do pedido não permite troca ou devolução"
   },
   "outcomes": {
     "approved_with_shipping": "Aprovada, com envio",
@@ -308,5 +371,40 @@
     "refund": "Devolução",
     "troca": "Troca",
     "devolucao": "Devolução"
+  },
+  "vtex": {
+    "title": "Pedido na VTEX",
+    "loading": "Consultando o pedido na VTEX",
+    "order": "Pedido",
+    "status": "Status",
+    "created": "Criado em",
+    "invoiced": "Faturado em",
+    "payment": "Pagamento",
+    "products": "Produtos do pedido",
+    "variation": "Tamanho/cor",
+    "reference": "Referência",
+    "quantity": "Quantidade",
+    "list_price": "Preço de tabela",
+    "values": "Valores",
+    "items_total": "Itens",
+    "discounts": "Descontos",
+    "shipping_total": "Frete",
+    "total": "Total",
+    "delivery": "Entrega",
+    "courier": "Transportadora",
+    "method": "Modalidade",
+    "estimate": "Previsão",
+    "tracking": "Rastreio",
+    "track": "Rastrear",
+    "delivered": "entregue em {{date}}",
+    "unverified": "Pedido encontrado pelo número digitado pelo cliente, que o Troque não confirmou. Pode não ser deste cliente: confira antes de informar.",
+    "reasons": {
+      "no_order_number": "Não há número de pedido para consultar.",
+      "not_found": "A VTEX não encontrou um pedido com esse número.",
+      "not_configured": "A consulta à VTEX não está configurada para esta marca.",
+      "forbidden": "A chave da VTEX não tem permissão para ler pedidos. Acione a TI.",
+      "unavailable": "A VTEX não respondeu. Tente de novo em instantes.",
+      "route_missing": "A consulta à VTEX ainda não está disponível no servidor."
+    }
   }
 }

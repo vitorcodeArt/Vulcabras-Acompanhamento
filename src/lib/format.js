@@ -67,3 +67,16 @@ export function formatTime(iso) {
 export function ratio(part, total) {
   return Number.isFinite(part) && Number.isFinite(total) && total > 0 ? part / total : null
 }
+
+/** ISO -> "19/11/2026" no fuso de São Paulo. */
+export function formatDate(iso) {
+  const p = parts(iso)
+  return p ? `${p.day}/${p.month}/${p.year}` : PLACEHOLDER
+}
+
+const moneyFormat = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
+
+/** Centavos -> "R$ 126,85"; ausente -> "–". */
+export function formatMoney(cents) {
+  return Number.isFinite(cents) ? moneyFormat.format(cents / 100) : PLACEHOLDER
+}

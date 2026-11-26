@@ -119,7 +119,7 @@ const COLUMNS = [
   'ticket'
 ]
 const CLICK_STATUSES = ['not_clicked', 'clicked', 'send_failed']
-const STATUSES = ['completed', 'handoff', 'error', 'abandoned', 'in_progress']
+const STATUSES = ['completed', 'handoff', 'not_eligible', 'error', 'abandoned', 'in_progress']
 
 export const openJourneyHash = (sendId) => `/envios/${encodeURIComponent(sendId)}`
 

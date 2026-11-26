@@ -92,7 +92,8 @@
       "completion_of_clicked": "Completion (of clicked)",
       "completion_of_sent": "Completion (of sent)",
       "handoff": "Asked for an agent",
-      "errors": "With error"
+      "errors": "With error",
+      "not_eligible": "Not eligible"
     },
     "daily_hint": "Sent, clicked and completed per day.",
     "breakdown_hint": "Sent in the period and rates."
@@ -128,7 +129,8 @@
     "handoff": "Asked for an agent",
     "error": "Ended with error",
     "abandoned": "Abandoned",
-    "in_progress": "In progress"
+    "in_progress": "In progress",
+    "not_eligible": "Not eligible"
   },
   "steps": {
     "start": "Start",
@@ -145,7 +147,7 @@
     "products": "Products",
     "details": "Product details",
     "submit": "Request submission",
-    "error": "Error screen"
+    "error": "Final screen"
   },
   "sends": {
     "title": "Sends",
@@ -191,7 +193,12 @@
     "send_failed": "The button was not sent: send failed on {{date}}.",
     "other_details": "Other details",
     "order": "Order",
-    "products": "Products"
+    "products": "Products",
+    "order_typed": "Order typed",
+    "order_unverified": "Not confirmed",
+    "order_unverified_hint": "Number typed by the customer that Troque did not confirm. Check it with the customer.",
+    "copy_order": "Copy order number {{id}}",
+    "chosen_products": "Products chosen by the customer"
   },
   "requestTypes": {
     "troca": "Exchange",
@@ -217,7 +224,11 @@
     "no_handoff": "No agent requests.",
     "errors_by_code": "Errors by type",
     "no_errors": "No errors in this period.",
-    "unknown_error": "No code recorded"
+    "unknown_error": "No code recorded",
+    "not_eligible": "Not eligible",
+    "not_eligible_by_reason": "Refusals by reason",
+    "not_eligible_hint": "Business rules; not counted as errors.",
+    "no_refusals": "No refusals in this period."
   },
   "catalog": {
     "empty": "No sessions in this period.",
@@ -245,19 +256,70 @@
     "flow_hint": "Exports the selected period and brand."
   },
   "diag": {
-    "title": "Error diagnosis",
-    "hint": "What the system recorded. Personal data is masked.",
-    "integration_failed": "Integration failure: {{tool}}",
-    "service": "service",
-    "ineligible": "Order not eligible for exchange or return",
-    "error_shown": "Error shown to the customer",
-    "handoff": "Customer sent to an agent",
-    "unknown": "The journey ended with an error, but no detail was recorded.",
+    "title": "What happened",
+    "hint": "Summary for the agent. Personal data is masked.",
     "error_type": "Error type",
     "upstream": "Integration response",
     "reason": "Reason",
     "step": "Step",
-    "shown_to_customer": "Message shown to the customer"
+    "message": "Message",
+    "guidance": "What to do",
+    "technical": "Technical details",
+    "notice": "Notice",
+    "cases": {
+      "active_request": {
+        "title": "There is already a request in progress",
+        "guidance": "Not an error. Follow the existing request or contact customer service."
+      },
+      "marketplace": {
+        "title": "Marketplace purchase",
+        "guidance": "Tell the customer to use the exchange center of the marketplace where they bought."
+      },
+      "order_situation": {
+        "title": "The order status does not allow an exchange",
+        "guidance": "Check the order status before advising the customer."
+      },
+      "deadline": {
+        "title": "Exchange period is over",
+        "guidance": "Tell the customer about the deadline."
+      },
+      "no_reasons": {
+        "title": "No exchange or return option",
+        "guidance": "Check whether the other type (exchange or return) is available."
+      },
+      "not_eligible": {
+        "title": "Order not eligible",
+        "guidance": "Check the Troque message before advising the customer."
+      },
+      "order_not_found": {
+        "title": "Order not found",
+        "guidance": "Confirm the order number and the CPF or e-mail with the customer."
+      },
+      "session_expired": {
+        "title": "Session expired",
+        "guidance": "Send the customer a new button."
+      },
+      "creation_unconfirmed": {
+        "title": "Creation not confirmed",
+        "guidance": "Check whether the request was created before asking to try again."
+      },
+      "integration": {
+        "title": "Troque failure",
+        "guidance": "Ask to try again. If it repeats, contact IT."
+      },
+      "screen_error": {
+        "title": "Error shown to the customer",
+        "guidance": "Ask to try again. If it repeats, contact IT."
+      },
+      "handoff": {
+        "title": "Customer sent to an agent",
+        "guidance": "Continue the service in the conversation."
+      },
+      "unknown": {
+        "title": "Ended with an error without detail",
+        "guidance": "Ask to try again. If it repeats, contact IT."
+      }
+    }
   },
   "meta": {
     "eligible": "Eligible",
@@ -295,7 +357,8 @@
   },
   "ineligibility": {
     "alreadyHaveActiveExchangeRequest": "There is already an active exchange request for the order",
-    "contactSAC": "Tell the customer to contact customer service"
+    "contactSAC": "Tell the customer to contact customer service",
+    "orderUnauthorizedSituation": "The order status does not allow exchange or return"
   },
   "outcomes": {
     "approved_with_shipping": "Approved, with shipping",
@@ -308,5 +371,40 @@
     "refund": "Return",
     "troca": "Exchange",
     "devolucao": "Return"
+  },
+  "vtex": {
+    "title": "VTEX order",
+    "loading": "Fetching the order from VTEX",
+    "order": "Order",
+    "status": "Status",
+    "created": "Created on",
+    "invoiced": "Invoiced on",
+    "payment": "Payment",
+    "products": "Order products",
+    "variation": "Size/color",
+    "reference": "Reference",
+    "quantity": "Quantity",
+    "list_price": "List price",
+    "values": "Amounts",
+    "items_total": "Items",
+    "discounts": "Discounts",
+    "shipping_total": "Shipping",
+    "total": "Total",
+    "delivery": "Delivery",
+    "courier": "Carrier",
+    "method": "Method",
+    "estimate": "Estimate",
+    "tracking": "Tracking",
+    "track": "Track",
+    "delivered": "delivered on {{date}}",
+    "unverified": "Order found by the number typed by the customer, which Troque did not confirm. It may not belong to this customer: check before sharing.",
+    "reasons": {
+      "no_order_number": "There is no order number to look up.",
+      "not_found": "VTEX found no order with this number.",
+      "not_configured": "VTEX lookup is not configured for this brand.",
+      "forbidden": "The VTEX key is not allowed to read orders. Contact IT.",
+      "unavailable": "VTEX did not answer. Try again shortly.",
+      "route_missing": "VTEX lookup is not available on the server yet."
+    }
   }
 }

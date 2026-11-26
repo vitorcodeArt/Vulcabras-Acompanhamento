@@ -310,7 +310,10 @@ export default function Overview({ params }) {
                 icon="headset"
                 label={c('handoff')}
                 value={formatNumber(totals.handoff)}
-                details={[{ label: c('errors'), value: formatNumber(totals.errors) }]}
+                details={[
+                  { label: c('errors'), value: formatNumber(totals.errors) },
+                  { label: c('not_eligible'), value: formatNumber(totals.not_eligible) }
+                ]}
               />
             </Kpis>
             <Split>
